@@ -10,7 +10,7 @@ The screenshots retain the lab domain, internal IP addresses, test usernames, an
 
 ## Image Organization
 
-The repository contains 143 screenshots organized in technical order across these topics:
+The repository contains 145 screenshots organized in technical order across these topics:
 
 - Topology
 - Lab environment

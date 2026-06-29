@@ -13,8 +13,6 @@ This project documents a complete Windows Server domain environment built around
 
 The main goal is to demonstrate how core Microsoft infrastructure components work together. Active Directory provides centralized identity, DNS allows domain and external name resolution, DHCP automates client addressing, RRAS provides lab routing/NAT, and Group Policy enforces workstation security settings. File services, roaming profiles, quotas, and software deployment are included to show how a domain environment supports daily user operations.
 
-From a cybersecurity perspective, the lab focuses on the controls that matter most in a small Windows domain: reducing default-account exposure, using named administrative access, separating users into groups, validating least privilege on file shares, controlling endpoint behavior through GPO, and checking that the environment behaves as expected after each change.
-
 ## Objectives
 
 - Build a Windows domain with two domain controllers.

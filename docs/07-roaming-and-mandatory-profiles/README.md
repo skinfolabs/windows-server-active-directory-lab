@@ -1,13 +1,13 @@
 # Roaming and Mandatory Profiles
 
-This chapter covers Roaming and Mandatory Profiles in the Windows Server infrastructure lab. It explains what was configured, why the configuration matters, and which evidence validates the result.
+This chapter documents roaming profile storage, AD profile paths, client profile behavior, and conversion of a profile to mandatory mode.
 
 
 ## Technical Context
 
-Roaming profiles allow user profile data to follow the user across workstations. An AD user account represents identity and authentication, while a Windows user profile contains the user environment, settings, and profile data loaded during logon.
+Roaming profiles allow user settings and profile data to follow the user across workstations. AD stores identity; the Windows profile stores the user environment loaded at logon.
 
-The goal of this section is to show centralized user-environment management. Roaming profiles support mobility between computers, while mandatory profiles enforce a consistent, non-persistent user environment.
+Roaming profiles support mobility, while mandatory profiles enforce a consistent, non-persistent environment.
 
 **Implemented controls:**
 
@@ -34,7 +34,7 @@ The goal of this section is to show centralized user-environment management. Roa
 
 A profile folder is created on DC1 to store roaming profile data centrally.
 
-> Roaming profiles need a central network location where profile data can be saved and loaded. Without a shared storage location, the user profile remains tied to one workstation.
+> Roaming profiles need central storage; otherwise the user profile remains tied to one workstation.
 
 ![Profile Folder Created](../../images/08-roaming-profiles/01-profile-folder-created.png)
 
@@ -46,7 +46,7 @@ A profile folder is created on DC1 to store roaming profile data centrally.
 
 The folder is shared so users can access their roaming profile location through the network.
 
-> The share makes the folder reachable over the network, while permissions control who can read or write profile data. Profile shares must be protected because they can contain user settings and personal application data.
+> The share exposes the profile path, while permissions protect profile data that may contain user settings and application data.
 
 ![Advanced Sharing for Profile Folder](../../images/08-roaming-profiles/04-advanced-sharing-for-profile-folder.png)
 
@@ -58,7 +58,7 @@ The folder is shared so users can access their roaming profile location through 
 
 The user object receives a profile path that points to the roaming profile share.
 
-> Active Directory stores the profile path on the user object so Windows knows where to load and save that user's profile during logon and logoff. This connects identity management with the user's working environment.
+> AD stores the profile path on the user object so Windows knows where to load and save the profile during logon and logoff.
 
 ![AD Profile Path](../../images/08-roaming-profiles/05-ad-profile-path.png)
 
@@ -70,7 +70,7 @@ The user object receives a profile path that points to the roaming profile share
 
 After the user signs in, the server-side profile folder is created automatically.
 
-> This proves the profile configuration works from the user's session, not only from the administrator's settings. It confirms that Windows can create and use the central profile location.
+> This proves the profile path works from the user's session, not only from the administrator's settings.
 
 ![User Profile Folder Created](../../images/08-roaming-profiles/06-user-profile-folder-created.png)
 
@@ -80,15 +80,15 @@ After the user signs in, the server-side profile folder is created automatically
 
 ### Step 05 - Convert the profile to mandatory
 
-After the roaming profile has been created and the user is logged off, the administrator opens the server-side profile folder and renames `NTUSER.DAT` to `NTUSER.MAN`. Windows then loads the profile as mandatory during the next sign-in.
+After the roaming profile is created and the user logs off, `NTUSER.DAT` is renamed to `NTUSER.MAN`. Windows then loads the profile as mandatory at the next sign-in.
 
-> `NTUSER.DAT` contains user-specific registry settings such as desktop and application preferences. Renaming it to `NTUSER.MAN` makes those settings read-only from the user's perspective: the user can work normally during the session, but profile changes are discarded at sign-out. Mandatory profiles are useful for shared workstations, training rooms, and other environments that require the same controlled desktop at every logon.
+> `NTUSER.DAT` stores user registry settings. Renaming it to `NTUSER.MAN` makes the profile mandatory: users can work normally, but changes are discarded at sign-out.
 
 ![NTUSER.MAN Mandatory Profile](../../images/08-roaming-profiles/11-ntuser-man-mandatory-profile.png)
 
 <p><sub><strong>Screenshot 102 - NTUSER.MAN Mandatory Profile:</strong> `NTUSER.MAN` conversion for a mandatory profile.</sub></p>
 
-The User Profiles control panel reports the account profile as `Mandatory`, confirming that Windows recognizes the conversion rather than treating it as a standard local or roaming profile.
+The User Profiles panel reports the account profile as `Mandatory`, confirming that Windows recognizes the conversion.
 
 ![Mandatory Profile Validation](../../images/08-roaming-profiles/12-mandatory-profile-visible.png)
 
@@ -99,26 +99,26 @@ The User Profiles control panel reports the account profile as `Mandatory`, conf
 ## Validation and Summary
 
 
-Validation is based on profile folder creation, share and NTFS permissions, AD profile path assignment, client-side profile visibility, owner and permission updates, NTUSER.MAN conversion, and the mandatory profile status screen.
+Validation confirms profile folders, share and NTFS permissions, AD profile paths, client visibility, owner updates, `NTUSER.MAN` conversion, and mandatory profile status.
 
 
-This chapter demonstrates domain profile management. Roaming profiles provide portable user settings, while mandatory profiles enforce a controlled profile state that discards user changes at sign-out.
+This chapter demonstrates roaming profile storage and mandatory profile enforcement for a controlled user environment.
 
 ---
 
 ## Project Chapters
 
-| # | Chapter | Description |
-|---|---------|-------------|
-| 0 | [Project Overview](../../README.md) | Main project overview, objectives, tools, and skills |
-| 1 | [Topology and Lab Environment](../01-topology-and-lab-environment/README.md) | Lab topology, addressing, server roles, operating-system baseline, and virtualization inventory |
-| 2 | [Active Directory Domain Services](../02-active-directory-domain-services/README.md) | Domain-controller deployment, administrative structures, scripted account creation, FSMO work, and AD replication validation |
-| 3 | [NAT and Routing with RRAS](../03-nat-and-rras-routing/README.md) | SAMNAT routing, RRAS NAT configuration, and outbound connectivity validation |
-| 4 | [DHCP Services and Failover](../04-dhcp-services-and-failover/README.md) | DHCP scope, exclusions, options, client lease validation, and DHCP failover |
-| 5 | [Remote Administration](../05-remote-administration/README.md) | RDP administration, administrator group access, and lab-only NAT forwarding validation |
-| 6 | [DNS Services and Name Resolution](../06-dns-services-and-name-resolution/README.md) | Forwarders, controlled zones, conditional forwarding, stub zones, secondary zones, host records, and round robin |
-| 7 | [Roaming and Mandatory Profiles](../07-roaming-and-mandatory-profiles/README.md) | Roaming profile storage, profile paths, server-side profile folders, and mandatory profile conversion |
-| 8 | [File Services and Access Control](../08-file-services-and-access-control/README.md) | File services, home folders, DATA permissions, mapped drives, and FSRM quota controls |
-| 9 | [Group Policy Hardening and Software Deployment](../09-group-policy-hardening-and-software-deployment/README.md) | User restrictions, removable-storage controls, administrator exceptions, local administrator targeting, and MSI deployment |
-| 10 | [Password Policy and Account Security](../10-password-policy-and-account-security/README.md) | Domain password policy baseline and account-security explanation |
-| 11 | [Final Summary](../11-final-summary/README.md) | Validation summary, production recommendations, skills, and project closure |
+| # | Chapter |
+|---|---------|
+| 0 | [Project Overview](../../README.md) |
+| 1 | [Topology and Lab Environment](../01-topology-and-lab-environment/README.md) |
+| 2 | [Active Directory Domain Services](../02-active-directory-domain-services/README.md) |
+| 3 | [NAT and Routing with RRAS](../03-nat-and-rras-routing/README.md) |
+| 4 | [DHCP Services and Failover](../04-dhcp-services-and-failover/README.md) |
+| 5 | [Remote Administration](../05-remote-administration/README.md) |
+| 6 | [DNS Services and Name Resolution](../06-dns-services-and-name-resolution/README.md) |
+| 7 | [Roaming and Mandatory Profiles](../07-roaming-and-mandatory-profiles/README.md) |
+| 8 | [File Services and Access Control](../08-file-services-and-access-control/README.md) |
+| 9 | [Group Policy Hardening and Software Deployment](../09-group-policy-hardening-and-software-deployment/README.md) |
+| 10 | [Password Policy and Account Security](../10-password-policy-and-account-security/README.md) |
+| 11 | [Final Summary](../11-final-summary/README.md) |

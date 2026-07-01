@@ -1,13 +1,13 @@
 # File Services and Access Control
 
-This chapter covers File Services and Access Control in the Windows Server infrastructure lab. It explains what was configured, why the configuration matters, and which evidence validates the result.
+This chapter documents Windows file services, home folders, DATA share permissions, mapped drives, access testing, and FSRM quota controls.
 
 
 ## Technical Context
 
 DC2 is configured as a file server. The lab creates home folders, a shared DATA folder, a script share, mapped drives, and an FSRM quota.
 
-The purpose is to demonstrate how enterprise file access is controlled through layers: share permissions, NTFS permissions, AD groups, mapped drives, and quota limits. AD defines users and groups, NTFS and share permissions enforce access, and FSRM controls storage consumption.
+The lab demonstrates layered file access: AD groups define roles, share and NTFS permissions enforce access, mapped drives improve usability, and FSRM controls storage consumption.
 
 **Implemented controls:**
 
@@ -36,7 +36,7 @@ The purpose is to demonstrate how enterprise file access is controlled through l
 
 DC2 is prepared to host file shares for domain users.
 
-> A file server centralizes storage so users do not depend only on local workstation disks. It also allows administrators to enforce permissions, quotas, and file-type controls from one managed server.
+> A file server centralizes storage and lets administrators enforce permissions, quotas, and file controls from one managed server.
 
 ![File Server Role Selection](../../images/09-file-server/01-file-server-role-selection.png)
 
@@ -46,9 +46,9 @@ DC2 is prepared to host file shares for domain users.
 
 ### Step 02 - Create the home folder root
 
-The home folder root is created and shared so each user can receive a personal mapped folder.
+The home folder root is created and shared for per-user mapped storage.
 
-> Home folders give users a dedicated network location for personal files. Keeping them under one root folder makes permissions, backups, quotas, and administration easier to manage.
+> Home folders give users personal network storage while keeping permissions, backups, quotas, and administration centralized.
 
 ![Home Folder Root Created](../../images/09-file-server/02-home-folder-root-created.png)
 
@@ -58,9 +58,9 @@ The home folder root is created and shared so each user can receive a personal m
 
 ### Step 03 - Map home folders through AD
 
-The AD user properties are configured with a home folder path. Windows creates the user-specific folder when the mapping is applied.
+AD user properties are configured with a home folder path. Windows creates the user-specific folder when the mapping applies.
 
-> Mapping home folders through Active Directory keeps storage assignment tied to the user account. When the user signs in, Windows can automatically present the same home drive without manual mapping on each workstation.
+> AD-based home-folder mapping keeps storage tied to the user account and avoids manual mapping on each workstation.
 
 ![AD Home Folder Mapping](../../images/09-file-server/05-ad-home-folder-mapping.png)
 
@@ -72,7 +72,7 @@ The AD user properties are configured with a home folder path. Windows creates t
 
 The Windows 10 client shows the mapped home drive, confirming the user folder mapping worked.
 
-> Validation from the client proves that the user can actually see and use the mapped drive. This checks AD settings, share access, network connectivity, and permissions together.
+> Client validation checks AD settings, share access, connectivity, and permissions together.
 
 ![Mapped Home Drive Visible](../../images/09-file-server/07-mapped-home-drive-visible.png)
 
@@ -84,15 +84,15 @@ The Windows 10 client shows the mapped home drive, confirming the user folder ma
 
 The DATA share is configured with group-based permissions. `Sys_Admins` receive Modify permission, while Sales users receive Read and Execute.
 
-The security goal is to avoid assigning access directly to individual users. Group-based access is easier to review, easier to remove, and safer when users move between roles.
+Group-based access is easier to review, remove, and adjust when users move between roles.
 
-> Share permissions and NTFS permissions work together. The effective access is the most restrictive result between them, so both layers must match the intended access model.
+> Share and NTFS permissions work together. Effective access is the most restrictive result between both layers.
 
 ![SysAdmins Modify Permission](../../images/09-file-server/11-sysadmins-modify-permission.png)
 
 <p><sub><strong>Screenshot 114 - SysAdmins Modify Permission:</strong> Sys_Admins Modify permission on the DATA share.</sub></p>
 
-The `Sales_group` receives **Read and Execute**, **List folder contents**, and **Read** permissions. These permissions allow Sales users to open the shared folder and read its contents without granting the ability to modify or delete files.
+`Sales_group` receives **Read and Execute**, **List folder contents**, and **Read**, allowing Sales users to view content without modifying or deleting files.
 
 ![Sales Read and Execute Permission](../../images/09-file-server/12-sales-read-execute-permission.png)
 
@@ -102,9 +102,9 @@ The `Sales_group` receives **Read and Execute**, **List folder contents**, and *
 
 ### Step 06 - Validate restricted Sales permissions
 
-The Sales user test confirms that the user can access the share but cannot delete files. This denied action is important validation: it proves that the permission boundary works, not only that access is possible.
+The Sales user can access the share but cannot delete files, proving that the permission boundary works.
 
-> Access-control testing should include both allowed and blocked actions. A successful denial proves that least privilege is enforced and that the Sales role cannot perform administrative file operations.
+> Access-control testing should include allowed and blocked actions. A successful denial proves least privilege is enforced.
 
 ![Sales Delete Denied Test](../../images/09-file-server/14-sales-delete-denied-test.png)
 
@@ -114,29 +114,29 @@ The Sales user test confirms that the user can access the share but cannot delet
 
 ### Step 07 - Create a script-based drive mapping
 
-A shared `Script` folder is prepared on DC2 to store the batch file used by domain clients. In this isolated lab, `Everyone` receives Modify access so the script can be reached and updated during testing.
+A shared `Script` folder on DC2 stores the client batch file. In this isolated lab, `Everyone` receives Modify access for testing.
 
-> Broad `Everyone` Modify permission is convenient for a training environment but is not appropriate for production. A real deployment should normally grant users only Read and Execute access while limiting script modification to an administrative group, because a writable logon or mapping script could be altered to execute unwanted commands.
+> Broad `Everyone` Modify access is lab-only. In production, users should normally have Read and Execute while only administrators can modify scripts.
 
 ![Script Folder Permissions](../../images/09-file-server/15-script-share-everyone-modify.png)
 
 <p><sub><strong>Screenshot 118 - Script Folder Permissions:</strong> Lab permissions on the Script folder allowing Everyone to modify its contents.</sub></p>
 
-The folder is shared as `\\SAMDC2\Script`, giving workstations a UNC path that does not depend on the local drive layout of the server.
+The folder is shared as `\\SAMDC2\Script`, giving workstations a stable UNC path.
 
 ![Script Share Network Path](../../images/09-file-server/16-script-share-network-path.png)
 
 <p><sub><strong>Screenshot 119 - Script Share Network Path:</strong> Script folder shared from DC2 through the `\\SAMDC2\Script` network path.</sub></p>
 
-The `Script.bat` file contains `net use X: \\Samdc2\data`. When the batch file runs, Windows connects the DATA share and assigns it the drive letter `X:`. This demonstrates a simple, repeatable method for providing users with a familiar drive letter for a network resource.
+`Script.bat` contains `net use X: \\Samdc2\data`, which maps the DATA share to drive `X:` for users.
 
-> `net use` is the classic Windows command for connecting a network share. Group Policy Preferences are generally easier to target and maintain in a larger production environment, but the batch-file method clearly demonstrates the underlying mapping command.
+> `net use` is the classic Windows share-mapping command. Group Policy Preferences are easier to maintain at scale, but the batch file shows the underlying method.
 
 ![Net Use Batch Script](../../images/09-file-server/17-net-use-batch-script.png)
 
 <p><sub><strong>Screenshot 120 - Net Use Batch Script:</strong> Batch script using `net use` to map the DATA share.</sub></p>
 
-After the script runs on `SAMWINPC1`, File Explorer shows `data (\\Samdc2) (X:)` under Network locations. This confirms that the client resolved DC2, reached the DATA share, and created the requested drive mapping.
+After the script runs, `SAMWINPC1` shows `data (\\Samdc2) (X:)`, confirming name resolution, share access, and drive mapping.
 
 ![Script Mapped Drive Validation](../../images/09-file-server/18-script-mapped-drive-validation.png)
 
@@ -146,9 +146,9 @@ After the script runs on `SAMWINPC1`, File Explorer shows `data (\\Samdc2) (X:)`
 
 ### Step 08 - Configure a 5 GB hard quota
 
-File Server Resource Manager is used to enforce a hard quota on home folders. This is an FSRM/file-server control, not an Active Directory quota.
+File Server Resource Manager enforces a hard quota on home folders. This is a file-server control, not an Active Directory quota.
 
-> FSRM means File Server Resource Manager. A hard quota blocks users from exceeding the limit, which protects shared storage from uncontrolled growth and helps enforce storage policy.
+> FSRM means File Server Resource Manager. A hard quota blocks users from exceeding the limit and protects shared storage from uncontrolled growth.
 
 ![Hard Quota 5GB](../../images/09-file-server/21-hard-quota-5gb.png)
 
@@ -159,26 +159,26 @@ File Server Resource Manager is used to enforce a hard quota on home folders. Th
 ## Validation and Summary
 
 
-Validation is based on file-server role installation, folder and share creation, NTFS permissions, AD home-folder mapping, mapped drive visibility, user access tests, a batch-based drive mapping, and the hard quota configuration.
+Validation confirms file-server role installation, folder and share creation, NTFS permissions, AD home-folder mapping, mapped drive visibility, user access tests, script-based drive mapping, and hard quota configuration.
 
 
-This chapter provides the shared storage layer for the lab. It demonstrates the relationship between AD groups, NTFS permissions, share access, home folders, mapped drives, and FSRM quota enforcement.
+This chapter provides the shared storage layer and shows how AD groups, NTFS permissions, share access, mapped drives, and FSRM quotas work together.
 
 ---
 
 ## Project Chapters
 
-| # | Chapter | Description |
-|---|---------|-------------|
-| 0 | [Project Overview](../../README.md) | Main project overview, objectives, tools, and skills |
-| 1 | [Topology and Lab Environment](../01-topology-and-lab-environment/README.md) | Lab topology, addressing, server roles, operating-system baseline, and virtualization inventory |
-| 2 | [Active Directory Domain Services](../02-active-directory-domain-services/README.md) | Domain-controller deployment, administrative structures, scripted account creation, FSMO work, and AD replication validation |
-| 3 | [NAT and Routing with RRAS](../03-nat-and-rras-routing/README.md) | SAMNAT routing, RRAS NAT configuration, and outbound connectivity validation |
-| 4 | [DHCP Services and Failover](../04-dhcp-services-and-failover/README.md) | DHCP scope, exclusions, options, client lease validation, and DHCP failover |
-| 5 | [Remote Administration](../05-remote-administration/README.md) | RDP administration, administrator group access, and lab-only NAT forwarding validation |
-| 6 | [DNS Services and Name Resolution](../06-dns-services-and-name-resolution/README.md) | Forwarders, controlled zones, conditional forwarding, stub zones, secondary zones, host records, and round robin |
-| 7 | [Roaming and Mandatory Profiles](../07-roaming-and-mandatory-profiles/README.md) | Roaming profile storage, profile paths, server-side profile folders, and mandatory profile conversion |
-| 8 | [File Services and Access Control](../08-file-services-and-access-control/README.md) | File services, home folders, DATA permissions, mapped drives, and FSRM quota controls |
-| 9 | [Group Policy Hardening and Software Deployment](../09-group-policy-hardening-and-software-deployment/README.md) | User restrictions, removable-storage controls, administrator exceptions, local administrator targeting, and MSI deployment |
-| 10 | [Password Policy and Account Security](../10-password-policy-and-account-security/README.md) | Domain password policy baseline and account-security explanation |
-| 11 | [Final Summary](../11-final-summary/README.md) | Validation summary, production recommendations, skills, and project closure |
+| # | Chapter |
+|---|---------|
+| 0 | [Project Overview](../../README.md) |
+| 1 | [Topology and Lab Environment](../01-topology-and-lab-environment/README.md) |
+| 2 | [Active Directory Domain Services](../02-active-directory-domain-services/README.md) |
+| 3 | [NAT and Routing with RRAS](../03-nat-and-rras-routing/README.md) |
+| 4 | [DHCP Services and Failover](../04-dhcp-services-and-failover/README.md) |
+| 5 | [Remote Administration](../05-remote-administration/README.md) |
+| 6 | [DNS Services and Name Resolution](../06-dns-services-and-name-resolution/README.md) |
+| 7 | [Roaming and Mandatory Profiles](../07-roaming-and-mandatory-profiles/README.md) |
+| 8 | [File Services and Access Control](../08-file-services-and-access-control/README.md) |
+| 9 | [Group Policy Hardening and Software Deployment](../09-group-policy-hardening-and-software-deployment/README.md) |
+| 10 | [Password Policy and Account Security](../10-password-policy-and-account-security/README.md) |
+| 11 | [Final Summary](../11-final-summary/README.md) |

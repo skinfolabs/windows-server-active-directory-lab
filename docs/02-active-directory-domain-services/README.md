@@ -1,13 +1,13 @@
 # Active Directory Domain Services
 
-This chapter covers Active Directory Domain Services in the Windows Server infrastructure lab. It explains what was configured, why the configuration matters, and which evidence validates the result.
+This chapter documents the Active Directory buildout for the lab: domain creation, controller redundancy, account administration, FSMO practice, and replication validation.
 
 
 ## Technical Context
 
-Active Directory is the foundation of the lab. DC1 is prepared first because it becomes the first domain controller in the forest and establishes the domain naming structure. Once the domain exists, DC2 is joined and promoted as an additional domain controller to demonstrate redundancy, replication, and role distribution.
+Active Directory is the lab's identity foundation. DC1 becomes the first domain controller and creates the forest, while DC2 is later promoted to demonstrate redundancy, replication, and role distribution.
 
-This section also includes account hardening and administrative group preparation because those decisions affect how the rest of the environment is managed.
+Account hardening and administrative groups are included because they define how the rest of the environment is managed.
 
 **Implemented controls:**
 
@@ -34,9 +34,9 @@ This section also includes account hardening and administrative group preparatio
 
 ### Step 01 - Rename DC1 before promotion
 
-The first server is renamed before domain promotion. Clear server naming is important because the hostname becomes part of the domain infrastructure and appears in DNS, ADUC, and management tools.
+DC1 is renamed before domain promotion so the hostname is clean before it appears in DNS, ADUC, and management tools.
 
-> A domain controller name becomes part of many administrative views and records. Renaming the server before promotion is cleaner than renaming it after it already holds domain-controller services, DNS records, and replication metadata.
+> Renaming before promotion avoids changing a server after it already holds domain-controller services, DNS records, and replication metadata.
 
 ![DC1 Computer Name](../../images/03-active-directory/01-dc1-computer-name.png)
 
@@ -48,7 +48,7 @@ The first server is renamed before domain promotion. Clear server naming is impo
 
 The AD DS and DNS roles are selected from Server Manager. DNS is installed with AD DS because the domain depends on DNS for locating domain controllers and services.
 
-> Active Directory Domain Services is the Windows role that provides centralized authentication, users, groups, computers, and domain policy. DNS is installed alongside it because domain clients use DNS records to find domain controllers and logon services.
+> AD DS provides centralized authentication, users, groups, computers, and policy. DNS is installed with it because domain clients use DNS records to find domain controllers and logon services.
 
 ![Add AD DS Role](../../images/03-active-directory/02-add-ad-ds-role.png)
 
@@ -60,7 +60,7 @@ The AD DS and DNS roles are selected from Server Manager. DNS is installed with 
 
 DC1 is promoted into a new forest using `samueldomain.com` as the root domain. This creates the directory structure, domain naming context, and initial domain services.
 
-> A forest is the top-level security and directory boundary in Active Directory. Creating the first forest and root domain turns the server from a standalone machine into the first authority for identity, authentication, and policy in the lab.
+> A forest is the top-level Active Directory boundary. Creating the first forest turns DC1 into the first authority for identity, authentication, and policy in the lab.
 
 ![New Forest Root Domain](../../images/03-active-directory/04-new-forest-root-domain.png)
 
@@ -70,25 +70,25 @@ DC1 is promoted into a new forest using `samueldomain.com` as the root domain. T
 
 ### Step 04 - Controlled admin account and built-in account hardening
 
-After domain creation, a controlled administrative account is created and used instead of relying on the default built-in Administrator account. At this stage, the built-in Administrator account is also disabled as part of the hardening process.
+After domain creation, a controlled admin account is created and used instead of the default built-in Administrator account. The built-in account is also disabled as part of hardening.
 
-This is a security-focused change, not just an administrative preference. The built-in Administrator account has the well-known RID 500, which makes it predictable during RID enumeration and account discovery. Attackers often look for default privileged accounts first, so using a named controlled admin account and disabling or renaming the default account reduces exposure to default-user targeting while keeping administrative access available.
+The built-in Administrator account has the well-known RID 500, making it predictable during RID enumeration and account discovery. Using a named admin account and disabling or renaming the default account reduces default-user targeting while preserving administrative access.
 
-> Administrative work should be tied to controlled, named accounts instead of a default account that every attacker expects to exist. This also makes auditing cleaner because privileged actions can be connected to a specific administrative identity.
+> Named admin accounts make privileged access less predictable and easier to audit than a default account every attacker expects to exist.
 
 ![Create Controlled Admin Account](../../images/03-active-directory/06-create-controlled-admin-account.png)
 
 <p><sub><strong>Screenshot 011 - Create Controlled Admin Account:</strong> Controlled administrative account created before hardening the default built-in Administrator account.</sub></p>
 
-> Security note: In a production environment, this control should be combined with least privilege, privileged access management, MFA for administrative access, and auditing of privileged logons.
+> Security note: In production, combine this with least privilege, PAM, MFA, and privileged-logon auditing.
 
 ---
 
 ### Step 05 - Promote DC2 into the existing domain
 
-DC2 is joined to the existing domain and promoted as an additional domain controller. This improves resilience and provides another server for domain services.
+DC2 is joined to the domain and promoted as an additional domain controller for resilience and service redundancy.
 
-> A second domain controller gives the domain another copy of the directory database and another server that can answer logon and directory requests. This reduces dependence on DC1 and demonstrates the idea of redundancy in identity infrastructure.
+> A second domain controller stores another directory copy and can answer logon and directory requests, reducing dependence on DC1.
 
 ![Promote DC2 Existing Domain](../../images/03-active-directory/10-promote-dc2-existing-domain.png)
 
@@ -98,9 +98,9 @@ DC2 is joined to the existing domain and promoted as an additional domain contro
 
 ### Step 06 - Transfer the RID Master role
 
-The RID Master FSMO role is transferred to DC2 as part of the domain-controller administration exercise. The RID Master allocates relative IDs used to create unique SIDs for new AD objects.
+The RID Master FSMO role is transferred to DC2. This role allocates relative IDs used to create unique SIDs for new AD objects.
 
-> FSMO means Flexible Single Master Operations. These are special Active Directory roles that must be handled by one domain controller at a time to avoid conflicts. The RID Master gives domain controllers pools of Relative IDs, and those RIDs become part of each user, group, or computer SID. Without available RID pools, the domain can run into problems creating new security principals.
+> FSMO means Flexible Single Master Operations: special AD roles handled by one domain controller at a time. The RID Master issues Relative ID pools used in user, group, and computer SIDs.
 
 ![Transfer RID Master to DC2](../../images/03-active-directory/13-transfer-rid-master-to-dc2.png)
 
@@ -112,7 +112,7 @@ The RID Master FSMO role is transferred to DC2 as part of the domain-controller 
 
 The lab creates groups such as `Sales` and `Sys_Admins`. These groups are later used for file permissions, remote management, and Group Policy targeting.
 
-> Groups are the clean way to manage access. Instead of assigning permissions one user at a time, users are placed into groups and permissions are assigned to the group, which is easier to audit and maintain.
+> Groups make access easier to audit and maintain because permissions are assigned to roles instead of individual users.
 
 ![Sales and SysAdmins Groups](../../images/03-active-directory/15-sales-and-sysadmins-groups.png)
 
@@ -122,7 +122,7 @@ The lab creates groups such as `Sales` and `Sys_Admins`. These groups are later 
 
 ### Step 08 - Create users and groups with DSADD
 
-The lab uses `dsadd` to create a domain user and two security groups directly from Command Prompt. Each command identifies the Active Directory object by its distinguished name, which includes the object name, container, and domain path.
+The lab uses `dsadd` to create a domain user and two security groups from Command Prompt. Each object is identified by its distinguished name, including object name, container, and domain path.
 
 ```cmd
 dsadd user "CN=David Scotch,CN=Users,DC=SamuelDomain,DC=com" ^
@@ -144,7 +144,7 @@ dsadd group "CN=Group 2,CN=Users,DC=SamuelDomain,DC=com" ^
     -members "CN=David Scotch,CN=Users,DC=SamuelDomain,DC=com"
 ```
 
-> `dsadd` demonstrates repeatable administration without relying on the graphical console. The password and non-expiring setting are retained for this isolated lab; production accounts should use protected credential handling, password expiration, and least-privilege group membership.
+> `dsadd` demonstrates repeatable administration outside the GUI. The password and non-expiring setting are kept for this isolated lab; production accounts need protected credential handling and least privilege.
 
 ![DSADD Script Run](../../images/03-active-directory/17-dsadd-users-and-groups-script-run.png)
 
@@ -154,7 +154,7 @@ dsadd group "CN=Group 2,CN=Users,DC=SamuelDomain,DC=com" ^
 
 ### Step 09 - Create users with PowerShell
 
-PowerShell is used to add ten domain users, `user50` through `user59`, to the `PS` organizational unit. These accounts can then be assigned to security groups and used in later administration, access-control, Group Policy, and service-validation tasks.
+PowerShell adds ten domain users, `user50` through `user59`, to the `PS` OU for later access-control, Group Policy, and service-validation tasks.
 
 > Automating account creation keeps usernames, UPNs, OU placement, and initial account settings consistent. The `-lt 60` condition stops the loop before 60, producing exactly ten accounts.
 
@@ -193,19 +193,19 @@ for ($i = 50; $i -lt 60; $i++) {
 
 ### Step 10 - Validate AD replication
 
-Before comparing directory objects, DC2 is discovered through Active Directory and added to the **All Servers** view in Server Manager. This gives the administrator a central console for monitoring and opening management tools against both domain controllers.
+Before comparing directory objects, DC2 is discovered through Active Directory and added to **All Servers** in Server Manager.
 
-> Adding DC2 to Server Manager does not enable replication by itself. AD DS replication is established when DC2 is promoted as an additional domain controller; this screen confirms that the server can be discovered in the domain and added to the management console before replication is checked in ADUC.
+> Adding DC2 to Server Manager does not create replication; promotion does. This screen only confirms that DC2 is discoverable and manageable before ADUC validation.
 
 ![Add DC2 to Server Manager](../../images/03-active-directory/21-server-manager-add-dc2.png)
 
 <p><sub><strong>Screenshot 026 - Add DC2 to Server Manager:</strong> DC2 discovered through Active Directory and selected for addition to Server Manager.</sub></p>
 
-Active Directory Users and Computers is opened separately against `samdc2.samueldomain.com` and `samdc1.samueldomain.com`. The `PS` organizational unit and the same user objects are visible through both domain controllers, confirming that the directory changes replicated between DC1 and DC2.
+ADUC is opened against both `samdc2.samueldomain.com` and `samdc1.samueldomain.com`. The `PS` OU and matching users appear through both controllers, confirming replication.
 
-The directory view also contains `user60`, an additional test account outside the ten-account PowerShell loop documented above. The loop itself intentionally creates `user50` through `user59`.
+The view also contains `user60`, an extra test account outside the documented PowerShell loop. The loop intentionally creates `user50` through `user59`.
 
-> Replication is what keeps domain controllers synchronized. If users or groups appear on one domain controller but not another, clients may receive inconsistent authentication or policy results depending on which domain controller they contact.
+> Replication keeps domain controllers synchronized so clients receive consistent authentication and policy results regardless of which controller they contact.
 
 ![AD Replication Visible on Both DCs](../../images/03-active-directory/22-ad-replication-visible-on-both-dcs.png)
 
@@ -216,26 +216,26 @@ The directory view also contains `user60`, an additional test account outside th
 ## Validation and Summary
 
 
-Validation is based on AD DS role screens, domain promotion evidence, FSMO role transfer evidence, account and group creation, Server Manager discovery, and Active Directory Users and Computers views against both domain controllers.
+Validation confirms AD DS role installation, domain promotion, FSMO transfer practice, object creation, Server Manager discovery, and ADUC visibility on both domain controllers.
 
 
-This chapter creates the central identity layer for the lab. DC1 and DC2 provide domain services, DNS integration, administrative accounts, groups, scripted users, and replicated directory objects used by the following service chapters.
+This chapter creates the lab's identity layer: DC1 and DC2, DNS integration, admin accounts, groups, scripted users, and replicated AD objects.
 
 ---
 
 ## Project Chapters
 
-| # | Chapter | Description |
-|---|---------|-------------|
-| 0 | [Project Overview](../../README.md) | Main project overview, objectives, tools, and skills |
-| 1 | [Topology and Lab Environment](../01-topology-and-lab-environment/README.md) | Lab topology, addressing, server roles, operating-system baseline, and virtualization inventory |
-| 2 | [Active Directory Domain Services](../02-active-directory-domain-services/README.md) | Domain-controller deployment, administrative structures, scripted account creation, FSMO work, and AD replication validation |
-| 3 | [NAT and Routing with RRAS](../03-nat-and-rras-routing/README.md) | SAMNAT routing, RRAS NAT configuration, and outbound connectivity validation |
-| 4 | [DHCP Services and Failover](../04-dhcp-services-and-failover/README.md) | DHCP scope, exclusions, options, client lease validation, and DHCP failover |
-| 5 | [Remote Administration](../05-remote-administration/README.md) | RDP administration, administrator group access, and lab-only NAT forwarding validation |
-| 6 | [DNS Services and Name Resolution](../06-dns-services-and-name-resolution/README.md) | Forwarders, controlled zones, conditional forwarding, stub zones, secondary zones, host records, and round robin |
-| 7 | [Roaming and Mandatory Profiles](../07-roaming-and-mandatory-profiles/README.md) | Roaming profile storage, profile paths, server-side profile folders, and mandatory profile conversion |
-| 8 | [File Services and Access Control](../08-file-services-and-access-control/README.md) | File services, home folders, DATA permissions, mapped drives, and FSRM quota controls |
-| 9 | [Group Policy Hardening and Software Deployment](../09-group-policy-hardening-and-software-deployment/README.md) | User restrictions, removable-storage controls, administrator exceptions, local administrator targeting, and MSI deployment |
-| 10 | [Password Policy and Account Security](../10-password-policy-and-account-security/README.md) | Domain password policy baseline and account-security explanation |
-| 11 | [Final Summary](../11-final-summary/README.md) | Validation summary, production recommendations, skills, and project closure |
+| # | Chapter |
+|---|---------|
+| 0 | [Project Overview](../../README.md) |
+| 1 | [Topology and Lab Environment](../01-topology-and-lab-environment/README.md) |
+| 2 | [Active Directory Domain Services](../02-active-directory-domain-services/README.md) |
+| 3 | [NAT and Routing with RRAS](../03-nat-and-rras-routing/README.md) |
+| 4 | [DHCP Services and Failover](../04-dhcp-services-and-failover/README.md) |
+| 5 | [Remote Administration](../05-remote-administration/README.md) |
+| 6 | [DNS Services and Name Resolution](../06-dns-services-and-name-resolution/README.md) |
+| 7 | [Roaming and Mandatory Profiles](../07-roaming-and-mandatory-profiles/README.md) |
+| 8 | [File Services and Access Control](../08-file-services-and-access-control/README.md) |
+| 9 | [Group Policy Hardening and Software Deployment](../09-group-policy-hardening-and-software-deployment/README.md) |
+| 10 | [Password Policy and Account Security](../10-password-policy-and-account-security/README.md) |
+| 11 | [Final Summary](../11-final-summary/README.md) |

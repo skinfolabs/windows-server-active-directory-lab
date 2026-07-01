@@ -1,15 +1,15 @@
 # DNS Services and Name Resolution
 
-This chapter covers DNS Services and Name Resolution in the Windows Server infrastructure lab. It explains what was configured, why the configuration matters, and which evidence validates the result.
+This chapter documents DNS administration for the domain: internal resolution, external forwarding, controlled zones, stub zones, secondary zones, host records, and round robin testing.
 
 
 ## Technical Context
 
-DNS supports the domain and provides internal name resolution, external forwarding, controlled domain blocking, zone management, stub zones, and round robin behavior. In Active Directory, DNS is critical because clients use it to locate domain controllers and domain services.
+DNS supports domain logon and name resolution. In Active Directory, clients rely on DNS records to locate domain controllers, Kerberos services, Group Policy paths, and internal resources.
 
-This section demonstrates both internal DNS administration and external resolution behavior. The configuration includes forwarders, custom zones, conditional forwarding, a stub zone, secondary zone behavior, host records, and round robin testing.
+The configuration covers both internal domain resolution and external lookup behavior.
 
-DNS is treated here as both an infrastructure service and a security control. If DNS is wrong, domain logon, Kerberos, Group Policy, software deployment, and file access can all fail. If DNS is intentionally controlled, it can also be used to steer or block name resolution in a lab-safe way.
+DNS is also used as a lab-safe control point for steering or blocking name resolution.
 
 **Implemented controls:**
 
@@ -38,7 +38,7 @@ DNS is treated here as both an infrastructure service and a security control. If
 
 Domain systems are configured to use the internal domain DNS servers. This is required for domain join, authentication, and service discovery.
 
-> Active Directory depends on DNS service records. If a client uses an external DNS server instead of the domain DNS server, it may resolve internet names but still fail to find domain controllers, logon services, or Group Policy paths.
+> If a domain client uses external DNS instead of domain DNS, internet names may work while logon services, Group Policy, and domain-controller discovery fail.
 
 ![Windows 10 DNS Client Settings](../../images/07-dns/05-win10-dns-client-settings.png)
 
@@ -48,9 +48,9 @@ Domain systems are configured to use the internal domain DNS servers. This is re
 
 ### Step 02 - Configure external DNS forwarding
 
-External forwarding is configured so internal DNS servers can forward unresolved queries to an upstream DNS provider.
+External forwarding sends unresolved internal DNS queries to an upstream resolver.
 
-> Internal DNS should answer domain-related queries itself, but it still needs a path for internet names. A forwarder lets the domain DNS server keep control of internal resolution while sending unknown external queries to a trusted upstream resolver.
+> A forwarder lets domain DNS keep control of internal records while sending unknown external names to a trusted resolver.
 
 ![DC1 External Forwarder](../../images/07-dns/08-dc1-external-forwarder.png)
 
@@ -60,9 +60,9 @@ External forwarding is configured so internal DNS servers can forward unresolved
 
 ### Step 03 - Create a controlled zone for Facebook blocking
 
-The lab creates a DNS zone for `facebook.com` and adds a controlled host record that prevents normal resolution. This demonstrates DNS-based name-resolution control in a lab context.
+The lab creates a DNS zone for `facebook.com` and adds a controlled host record that prevents normal resolution.
 
-> DNS can be used to influence where clients go when they request a name. In this lab, a controlled zone demonstrates how name resolution can block or redirect access, which is useful for understanding both defensive filtering and the risk of malicious DNS manipulation.
+> Controlled DNS zones show how name resolution can block or redirect access, which helps explain defensive filtering and malicious DNS manipulation.
 
 ![Facebook Zone Name](../../images/07-dns/11-facebook-zone-name.png)
 
@@ -72,9 +72,9 @@ The lab creates a DNS zone for `facebook.com` and adds a controlled host record 
 
 ### Step 04 - Validate the Facebook resolution result
 
-The client validation shows that the configured DNS response prevents normal access to the target domain.
+The client test shows that the configured DNS response prevents normal access to the target domain.
 
-> A DNS control is only useful if the endpoint receives the expected answer. Testing from the client confirms that the DNS zone is actually affecting user traffic, not just existing in DNS Manager.
+> Testing from the client confirms that the DNS control affects endpoint traffic, not only DNS Manager configuration.
 
 ![Facebook Resolution Block Validation](../../images/07-dns/13-facebook-resolution-block-validation.png)
 
@@ -84,9 +84,9 @@ The client validation shows that the configured DNS response prevents normal acc
 
 ### Step 05 - Discover Google name servers
 
-`nslookup` is run from the Windows 10 client with the query type set to `NS`. The client sends the request to DC1 at `192.168.116.200` and receives the authoritative Google name servers, including `ns1.google.com`, `ns2.google.com`, `ns3.google.com`, and `ns4.google.com`.
+`nslookup` runs from the Windows 10 client with query type `NS`. The client queries DC1 at `192.168.116.200` and receives Google's authoritative name servers.
 
-> The successful response confirms that the client is using DC1 as its DNS server and that DC1 can resolve external DNS data. The `Server: Unknown` label only indicates that a reverse PTR record is not available for the DNS server address; it does not mean the lookup failed.
+> The response confirms that the client uses DC1 for DNS and that DC1 can resolve external records. `Server: Unknown` only means no reverse PTR exists for the DNS server address.
 
 ![Google nslookup Output](../../images/07-dns/14-google-nslookup-output.png)
 
@@ -98,7 +98,7 @@ The client validation shows that the configured DNS response prevents normal acc
 
 DC1 is configured with a conditional forwarder for `google.com` that sends matching queries to `ns1.google.com` at `216.239.32.10`. Queries for other domains continue to use the server's normal DNS resolution path.
 
-> Conditional forwarding creates a domain-specific resolution path. It is commonly used when an organization must resolve a partner domain, a private namespace, or another Active Directory forest through designated DNS servers without changing resolution for every other domain. Google is used here to demonstrate the mechanism in the lab.
+> Conditional forwarding sends one namespace to designated DNS servers without changing resolution for other domains. Google is used here only to demonstrate the mechanism.
 
 ![Google Conditional Forwarder](../../images/07-dns/15-google-conditional-forwarder.png)
 
@@ -108,9 +108,9 @@ DC1 is configured with a conditional forwarder for `google.com` that sends match
 
 ### Step 07 - Configure a Yahoo stub zone
 
-A stub zone for `yahoo.com` is created from the master server `ns2.yahoo.com` at `68.142.255.16`. DC1 uses that server to obtain the zone's SOA record, NS records, and the address records needed to locate Yahoo's authoritative DNS servers.
+A stub zone for `yahoo.com` is created from `ns2.yahoo.com` at `68.142.255.16`. DC1 uses it to obtain SOA, NS, and glue records for Yahoo's authoritative DNS servers.
 
-> Unlike a conditional forwarder, which sends matching queries to a fixed DNS server, a stub zone maintains a small, refreshable list of authoritative servers for the target zone. This is useful when DNS should follow the authoritative server set as it changes without storing a complete copy of the external zone.
+> Unlike a conditional forwarder, a stub zone keeps a small, refreshable list of authoritative servers without storing the full external zone.
 
 ![Yahoo Stub Zone Master Servers](../../images/07-dns/17-yahoo-stub-zone-master-servers.png)
 
@@ -122,7 +122,7 @@ A stub zone for `yahoo.com` is created from the master server `ns2.yahoo.com` at
 
 The lab creates a primary zone on DC1 and a secondary zone on DC2. The secondary zone receives data from the primary DNS server.
 
-> A secondary zone is a read-only copy of a DNS zone transferred from a primary server. This improves availability for name resolution and demonstrates how DNS data can be replicated between DNS servers.
+> A secondary zone is a read-only copy transferred from a primary DNS server, improving availability for name resolution.
 
 ![Secondary Zone Master IP](../../images/07-dns/21-secondary-zone-master-ip.png)
 
@@ -132,15 +132,15 @@ The lab creates a primary zone on DC1 and a secondary zone on DC2. The secondary
 
 ### Step 09 - Create and validate a New Host record
 
-The **New Host** action in DNS Manager creates an `A` record that maps a readable host name to an IPv4 address. In this step, the name `mail` is mapped to DC1 at `192.168.116.200`, creating the fully qualified domain name `mail.samueldomain.com`.
+The **New Host** action creates an `A` record that maps a host name to an IPv4 address. Here, `mail` points to DC1 at `192.168.116.200`, creating `mail.samueldomain.com`.
 
-> New Host records allow users and applications to reach systems by name instead of remembering IP addresses. They can identify web servers, mail services, file servers, application endpoints, printers, and other network devices. The `ping -a mail` test from the Windows 10 client confirms that the new name resolves to the intended address.
+> Host records let users and applications reach systems by name instead of IP address. The `ping -a mail` test confirms that the name resolves to the intended server.
 
 ![Mail A Record Created](../../images/07-dns/23-mail-a-record-created.png)
 
 <p><sub><strong>Screenshot 087 - Mail A Record Created:</strong> Mail A record created for lab name-resolution validation.</sub></p>
 
-After the record is created, PC1 resolves `mail.samueldomain.com` to `192.168.116.200` and receives replies from DC1. This confirms that the New Host record is available to domain clients through the internal DNS service.
+PC1 resolves `mail.samueldomain.com` to `192.168.116.200` and receives replies from DC1, confirming that the record is available through internal DNS.
 
 ![Mail Host Record Validation](../../images/07-dns/24-mail-record-ping-validation.png)
 
@@ -150,11 +150,11 @@ After the record is created, PC1 resolves `mail.samueldomain.com` to `192.168.11
 
 ### Step 10 - Configure and validate DNS round robin
 
-DNS round robin is a basic load-distribution method that places several IP addresses behind one host name. DC1 rotates the order of those addresses in its responses, helping spread client requests across multiple equivalent servers instead of directing every request to one system.
+DNS round robin places several IP addresses behind one host name. DC1 rotates the address order in responses so requests can be distributed across equivalent servers.
 
-First, three `A` records are created with the same test hostname and different Google server addresses. The **Enable round robin** option is then enabled in the advanced properties of the DC1 DNS service. Finally, repeated `nslookup` queries are run from PC1 to confirm that the returned address order changes.
+Three `A` records are created with the same test hostname and different Google server addresses. Round robin is enabled on DC1, then repeated `nslookup` queries from PC1 confirm that the returned order changes.
 
-> Round robin can reduce the concentration of traffic on one server and improve basic service distribution. It is not a full load balancer because DNS does not check whether a server is healthy, and client-side DNS caching can influence which address is selected.
+> Round robin can spread basic requests, but it is not full load balancing because DNS does not check server health and client caching can affect selection.
 
 ![Round Robin Host Records](../../images/07-dns/25-round-robin-host-records.png)
 
@@ -173,26 +173,26 @@ First, three `A` records are created with the same test hostname and different G
 ## Validation and Summary
 
 
-Validation is based on DNS client settings, forwarder configuration, DNS zone screens, nslookup output, ping tests, secondary-zone visibility, and round robin query behavior from a client.
+Validation confirms DNS client settings, forwarders, zones, `nslookup` output, ping tests, secondary-zone visibility, and client-side round robin behavior.
 
 
-This chapter shows how DNS supports domain services and name-resolution control. It validates internal host records, forwarding behavior, secondary zones, stub zones, and basic DNS round robin behavior.
+This chapter validates domain DNS settings, forwarding, zones, host records, and basic round robin behavior.
 
 ---
 
 ## Project Chapters
 
-| # | Chapter | Description |
-|---|---------|-------------|
-| 0 | [Project Overview](../../README.md) | Main project overview, objectives, tools, and skills |
-| 1 | [Topology and Lab Environment](../01-topology-and-lab-environment/README.md) | Lab topology, addressing, server roles, operating-system baseline, and virtualization inventory |
-| 2 | [Active Directory Domain Services](../02-active-directory-domain-services/README.md) | Domain-controller deployment, administrative structures, scripted account creation, FSMO work, and AD replication validation |
-| 3 | [NAT and Routing with RRAS](../03-nat-and-rras-routing/README.md) | SAMNAT routing, RRAS NAT configuration, and outbound connectivity validation |
-| 4 | [DHCP Services and Failover](../04-dhcp-services-and-failover/README.md) | DHCP scope, exclusions, options, client lease validation, and DHCP failover |
-| 5 | [Remote Administration](../05-remote-administration/README.md) | RDP administration, administrator group access, and lab-only NAT forwarding validation |
-| 6 | [DNS Services and Name Resolution](../06-dns-services-and-name-resolution/README.md) | Forwarders, controlled zones, conditional forwarding, stub zones, secondary zones, host records, and round robin |
-| 7 | [Roaming and Mandatory Profiles](../07-roaming-and-mandatory-profiles/README.md) | Roaming profile storage, profile paths, server-side profile folders, and mandatory profile conversion |
-| 8 | [File Services and Access Control](../08-file-services-and-access-control/README.md) | File services, home folders, DATA permissions, mapped drives, and FSRM quota controls |
-| 9 | [Group Policy Hardening and Software Deployment](../09-group-policy-hardening-and-software-deployment/README.md) | User restrictions, removable-storage controls, administrator exceptions, local administrator targeting, and MSI deployment |
-| 10 | [Password Policy and Account Security](../10-password-policy-and-account-security/README.md) | Domain password policy baseline and account-security explanation |
-| 11 | [Final Summary](../11-final-summary/README.md) | Validation summary, production recommendations, skills, and project closure |
+| # | Chapter |
+|---|---------|
+| 0 | [Project Overview](../../README.md) |
+| 1 | [Topology and Lab Environment](../01-topology-and-lab-environment/README.md) |
+| 2 | [Active Directory Domain Services](../02-active-directory-domain-services/README.md) |
+| 3 | [NAT and Routing with RRAS](../03-nat-and-rras-routing/README.md) |
+| 4 | [DHCP Services and Failover](../04-dhcp-services-and-failover/README.md) |
+| 5 | [Remote Administration](../05-remote-administration/README.md) |
+| 6 | [DNS Services and Name Resolution](../06-dns-services-and-name-resolution/README.md) |
+| 7 | [Roaming and Mandatory Profiles](../07-roaming-and-mandatory-profiles/README.md) |
+| 8 | [File Services and Access Control](../08-file-services-and-access-control/README.md) |
+| 9 | [Group Policy Hardening and Software Deployment](../09-group-policy-hardening-and-software-deployment/README.md) |
+| 10 | [Password Policy and Account Security](../10-password-policy-and-account-security/README.md) |
+| 11 | [Final Summary](../11-final-summary/README.md) |

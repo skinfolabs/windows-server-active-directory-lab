@@ -1,15 +1,15 @@
 # DHCP Services and Failover
 
-This chapter covers DHCP Services and Failover in the Windows Server infrastructure lab. It explains what was configured, why the configuration matters, and which evidence validates the result.
+This chapter documents DHCP deployment, scope design, client lease validation, and DHCP failover between the Windows Server systems.
 
 
 ## Technical Context
 
-DHCP is installed on DC1 to automatically provide IP configuration to client systems. Instead of manually configuring every workstation, DHCP distributes the address, subnet mask, gateway, DNS servers, and lease information from a central service.
+DHCP is installed on DC1 to centrally provide client IP address, subnet mask, gateway, DNS, and lease settings.
 
-The lab also configures a DHCP failover relationship with DC2. This demonstrates service continuity: if one DHCP server is unavailable, the partner server can continue supporting client address assignment.
+DC2 is configured as a DHCP failover partner so client address assignment can continue if one DHCP server is unavailable.
 
-From a security and operations point of view, DHCP has to be predictable. Wrong gateway or DNS options can break authentication, redirect traffic, or make clients use the wrong name-resolution path, so the scope, exclusions, and authorization are treated as controls rather than simple setup steps.
+DHCP must be predictable: wrong gateway or DNS options can break authentication, redirect traffic, or send clients to the wrong name-resolution path.
 
 **Implemented controls:**
 
@@ -37,7 +37,7 @@ From a security and operations point of view, DHCP has to be predictable. Wrong 
 
 The DHCP Server role is selected in Server Manager. This prepares DC1 to distribute IP configuration to client systems.
 
-> DHCP removes the need to manually configure every client with an IP address, gateway, and DNS server. In a domain, this is especially important because clients must receive the correct internal DNS settings to find Active Directory.
+> DHCP removes manual client addressing. In a domain, correct DNS options are critical because clients must find Active Directory.
 
 ![Select DHCP Server Role](../../images/05-dhcp/02-select-dhcp-server-role.png)
 
@@ -47,9 +47,9 @@ The DHCP Server role is selected in Server Manager. This prepares DC1 to distrib
 
 ### Step 02 - Authorize DHCP in Active Directory
 
-The DHCP server is authorized so it can issue leases in the AD domain environment. Authorization helps prevent an unmanaged DHCP server from silently handing out incorrect network settings inside the domain.
+The DHCP server is authorized in AD before issuing leases, helping prevent unmanaged DHCP from distributing incorrect settings.
 
-> In Active Directory environments, DHCP authorization is a protection mechanism against rogue DHCP servers. A rogue server can give clients the wrong gateway or DNS server, which can cause outages or enable traffic redirection.
+> DHCP authorization protects against rogue DHCP servers that could hand out a wrong gateway or DNS server.
 
 ![DHCP Authorization](../../images/05-dhcp/04-dhcp-authorization.png)
 
@@ -73,7 +73,7 @@ The DHCP scope defines the client address range. This lab uses a controlled rang
 
 The first addresses in the range are excluded so they can remain reserved for static infrastructure or other planned use.
 
-> Exclusions prevent DHCP from leasing addresses that should stay reserved for servers, routers, printers, or future infrastructure. This avoids IP conflicts between manually configured systems and DHCP clients.
+> Exclusions keep reserved infrastructure addresses out of the DHCP lease pool and prevent IP conflicts.
 
 ![DHCP Exclusion Range](../../images/05-dhcp/08-dhcp-exclusion-range.png)
 
@@ -85,7 +85,7 @@ The first addresses in the range are excluded so they can remain reserved for st
 
 The scope provides gateway and DNS settings to clients. The gateway points to SAMNAT and DNS points to the domain DNS servers.
 
-> DHCP options are just as important as the IP address itself. The default gateway tells clients how to leave the subnet, and DNS options tell them where to resolve domain names and locate domain controllers.
+> DHCP options are as important as the IP address: gateway controls routing, and DNS controls domain name resolution.
 
 ![DNS Server Option](../../images/05-dhcp/12-dns-server-option.png)
 
@@ -97,7 +97,7 @@ The scope provides gateway and DNS settings to clients. The gateway points to SA
 
 The Windows 10 client receives its IP configuration automatically from DHCP. This validates the DHCP scope and options.
 
-> Client validation proves that the DHCP server is not only configured, but actually usable from the endpoint side. It also confirms that the client receives the intended DNS and gateway values.
+> Client validation proves DHCP works from the endpoint side and delivers the intended DNS and gateway values.
 
 ![Windows 10 DHCP Address Validation](../../images/05-dhcp/13-win10-dhcp-address-validation.png)
 
@@ -107,9 +107,9 @@ The Windows 10 client receives its IP configuration automatically from DHCP. Thi
 
 ### Step 07 - Configure DHCP failover
 
-The lab configures a DHCP failover relationship with DC2. This is more accurately described as DHCP failover, not a failover cluster.
+The lab configures DHCP failover with DC2. This is DHCP service continuity, not a Windows failover cluster.
 
-> DHCP failover lets two DHCP servers share responsibility for leases. If one server is unavailable, the other can continue leasing addresses, which improves availability for client network access.
+> DHCP failover lets two servers share lease responsibility so the partner can continue leasing addresses during an outage.
 
 ![DHCP Failover Relationship](../../images/05-dhcp/17-dhcp-failover-relationship.png)
 
@@ -120,26 +120,26 @@ The lab configures a DHCP failover relationship with DC2. This is more accuratel
 ## Validation and Summary
 
 
-Validation is based on DHCP role installation, authorization, scope configuration, option screens, client IP assignment, network connectivity, and DHCP failover partner configuration.
+Validation confirms DHCP role installation, authorization, scope options, client addressing, connectivity, and failover partner configuration.
 
 
-This chapter automates client addressing and adds DHCP failover. The Windows 10 client receives the expected network settings, and DC2 is configured as a failover partner for address-service continuity.
+This chapter automates client addressing and adds DHCP failover. The client receives the expected settings, and DC2 is configured for address-service continuity.
 
 ---
 
 ## Project Chapters
 
-| # | Chapter | Description |
-|---|---------|-------------|
-| 0 | [Project Overview](../../README.md) | Main project overview, objectives, tools, and skills |
-| 1 | [Topology and Lab Environment](../01-topology-and-lab-environment/README.md) | Lab topology, addressing, server roles, operating-system baseline, and virtualization inventory |
-| 2 | [Active Directory Domain Services](../02-active-directory-domain-services/README.md) | Domain-controller deployment, administrative structures, scripted account creation, FSMO work, and AD replication validation |
-| 3 | [NAT and Routing with RRAS](../03-nat-and-rras-routing/README.md) | SAMNAT routing, RRAS NAT configuration, and outbound connectivity validation |
-| 4 | [DHCP Services and Failover](../04-dhcp-services-and-failover/README.md) | DHCP scope, exclusions, options, client lease validation, and DHCP failover |
-| 5 | [Remote Administration](../05-remote-administration/README.md) | RDP administration, administrator group access, and lab-only NAT forwarding validation |
-| 6 | [DNS Services and Name Resolution](../06-dns-services-and-name-resolution/README.md) | Forwarders, controlled zones, conditional forwarding, stub zones, secondary zones, host records, and round robin |
-| 7 | [Roaming and Mandatory Profiles](../07-roaming-and-mandatory-profiles/README.md) | Roaming profile storage, profile paths, server-side profile folders, and mandatory profile conversion |
-| 8 | [File Services and Access Control](../08-file-services-and-access-control/README.md) | File services, home folders, DATA permissions, mapped drives, and FSRM quota controls |
-| 9 | [Group Policy Hardening and Software Deployment](../09-group-policy-hardening-and-software-deployment/README.md) | User restrictions, removable-storage controls, administrator exceptions, local administrator targeting, and MSI deployment |
-| 10 | [Password Policy and Account Security](../10-password-policy-and-account-security/README.md) | Domain password policy baseline and account-security explanation |
-| 11 | [Final Summary](../11-final-summary/README.md) | Validation summary, production recommendations, skills, and project closure |
+| # | Chapter |
+|---|---------|
+| 0 | [Project Overview](../../README.md) |
+| 1 | [Topology and Lab Environment](../01-topology-and-lab-environment/README.md) |
+| 2 | [Active Directory Domain Services](../02-active-directory-domain-services/README.md) |
+| 3 | [NAT and Routing with RRAS](../03-nat-and-rras-routing/README.md) |
+| 4 | [DHCP Services and Failover](../04-dhcp-services-and-failover/README.md) |
+| 5 | [Remote Administration](../05-remote-administration/README.md) |
+| 6 | [DNS Services and Name Resolution](../06-dns-services-and-name-resolution/README.md) |
+| 7 | [Roaming and Mandatory Profiles](../07-roaming-and-mandatory-profiles/README.md) |
+| 8 | [File Services and Access Control](../08-file-services-and-access-control/README.md) |
+| 9 | [Group Policy Hardening and Software Deployment](../09-group-policy-hardening-and-software-deployment/README.md) |
+| 10 | [Password Policy and Account Security](../10-password-policy-and-account-security/README.md) |
+| 11 | [Final Summary](../11-final-summary/README.md) |

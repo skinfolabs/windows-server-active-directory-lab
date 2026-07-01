@@ -1,13 +1,13 @@
 # Password Policy and Account Security
 
-This chapter covers Password Policy and Account Security in the Windows Server infrastructure lab. It explains what was configured, why the configuration matters, and which evidence validates the result.
+This chapter documents the domain password policy baseline and why account-security settings matter in a Windows domain.
 
 
 ## Technical Context
 
-The lab configures a domain-wide password baseline through Group Policy. A centrally managed policy ensures that domain users follow the same credential requirements regardless of which joined workstation they use.
+A domain-wide password baseline is configured through Group Policy so users follow the same credential requirements on every joined workstation.
 
-Password policy is only one layer of account defense. It should support, not replace, account lockout policy, MFA, privileged account monitoring, and a clear process for handling compromised credentials.
+Password policy is only one layer of account defense and should be paired with lockout policy, MFA, privileged-account monitoring, and compromised-credential procedures.
 
 **Implemented controls:**
 
@@ -31,7 +31,7 @@ Password policy is only one layer of account defense. It should support, not rep
 
 ### Step 01 - Configure the domain password policy
 
-The `PassPolicy` GPO defines a consistent password baseline for domain accounts. It remembers the previous eight passwords, sets a maximum password age of 75 days, prevents another password change for 30 days, requires at least eight characters, and enables Windows complexity requirements.
+The `PassPolicy` GPO remembers the previous eight passwords, sets a 75-day maximum age, prevents changes for 30 days, requires at least eight characters, and enables Windows complexity requirements.
 
 Each setting addresses a different credential risk:
 
@@ -42,13 +42,13 @@ Each setting addresses a different credential risk:
 - **Complexity enabled** requires a mixture of character categories and prevents use of the account name inside the password. This helps reject simple, predictable choices, but it should be combined with longer passwords and known-compromised-password screening.
 - **Reversible encryption: Not Defined** means this GPO does not enable that option. Reversible password storage should remain disabled unless a documented legacy requirement makes it unavoidable, because it provides protection similar to storing plaintext credentials.
 
-> A domain password policy reduces the risk of weak passwords, repeated credential reuse, password-history bypass, and long-lived compromised credentials. Linking the policy at the domain root is important because domain-account password settings are processed as a domain-wide security baseline.
+> A domain password policy reduces weak passwords, credential reuse, history bypass, and long-lived compromised credentials. Linking it at the domain root makes it a domain-wide baseline.
 
 ![Domain Password Policy Settings](../../images/11-password-policy/01-domain-password-policy-settings.png)
 
 <p><sub><strong>Screenshot 144 - Domain Password Policy Settings:</strong> Domain password policy settings.</sub></p>
 
-The `PassPolicy` GPO is linked directly beneath `SamuelDomain.com` in Group Policy Management. This placement makes the policy part of the domain-level configuration rather than a setting limited to one workstation or user OU.
+The `PassPolicy` GPO is linked beneath `SamuelDomain.com`, making it a domain-level setting rather than a workstation or OU-only policy.
 
 ![Domain Password Policy Linked](../../images/11-password-policy/02-password-policy-linked.png)
 
@@ -57,26 +57,26 @@ The `PassPolicy` GPO is linked directly beneath `SamuelDomain.com` in Group Poli
 ## Validation and Summary
 
 
-Validation is based on the domain password-policy settings screen and the PassPolicy GPO link under the SamuelDomain.com domain.
+Validation confirms the password-policy settings and the `PassPolicy` GPO link under `SamuelDomain.com`.
 
 
-This chapter documents the password baseline for the lab and explains the security value and production caveats of password history, age, length, complexity, and reversible-encryption settings.
+This chapter documents the lab password baseline and the security value of history, age, length, complexity, and reversible-encryption settings.
 
 ---
 
 ## Project Chapters
 
-| # | Chapter | Description |
-|---|---------|-------------|
-| 0 | [Project Overview](../../README.md) | Main project overview, objectives, tools, and skills |
-| 1 | [Topology and Lab Environment](../01-topology-and-lab-environment/README.md) | Lab topology, addressing, server roles, operating-system baseline, and virtualization inventory |
-| 2 | [Active Directory Domain Services](../02-active-directory-domain-services/README.md) | Domain-controller deployment, administrative structures, scripted account creation, FSMO work, and AD replication validation |
-| 3 | [NAT and Routing with RRAS](../03-nat-and-rras-routing/README.md) | SAMNAT routing, RRAS NAT configuration, and outbound connectivity validation |
-| 4 | [DHCP Services and Failover](../04-dhcp-services-and-failover/README.md) | DHCP scope, exclusions, options, client lease validation, and DHCP failover |
-| 5 | [Remote Administration](../05-remote-administration/README.md) | RDP administration, administrator group access, and lab-only NAT forwarding validation |
-| 6 | [DNS Services and Name Resolution](../06-dns-services-and-name-resolution/README.md) | Forwarders, controlled zones, conditional forwarding, stub zones, secondary zones, host records, and round robin |
-| 7 | [Roaming and Mandatory Profiles](../07-roaming-and-mandatory-profiles/README.md) | Roaming profile storage, profile paths, server-side profile folders, and mandatory profile conversion |
-| 8 | [File Services and Access Control](../08-file-services-and-access-control/README.md) | File services, home folders, DATA permissions, mapped drives, and FSRM quota controls |
-| 9 | [Group Policy Hardening and Software Deployment](../09-group-policy-hardening-and-software-deployment/README.md) | User restrictions, removable-storage controls, administrator exceptions, local administrator targeting, and MSI deployment |
-| 10 | [Password Policy and Account Security](../10-password-policy-and-account-security/README.md) | Domain password policy baseline and account-security explanation |
-| 11 | [Final Summary](../11-final-summary/README.md) | Validation summary, production recommendations, skills, and project closure |
+| # | Chapter |
+|---|---------|
+| 0 | [Project Overview](../../README.md) |
+| 1 | [Topology and Lab Environment](../01-topology-and-lab-environment/README.md) |
+| 2 | [Active Directory Domain Services](../02-active-directory-domain-services/README.md) |
+| 3 | [NAT and Routing with RRAS](../03-nat-and-rras-routing/README.md) |
+| 4 | [DHCP Services and Failover](../04-dhcp-services-and-failover/README.md) |
+| 5 | [Remote Administration](../05-remote-administration/README.md) |
+| 6 | [DNS Services and Name Resolution](../06-dns-services-and-name-resolution/README.md) |
+| 7 | [Roaming and Mandatory Profiles](../07-roaming-and-mandatory-profiles/README.md) |
+| 8 | [File Services and Access Control](../08-file-services-and-access-control/README.md) |
+| 9 | [Group Policy Hardening and Software Deployment](../09-group-policy-hardening-and-software-deployment/README.md) |
+| 10 | [Password Policy and Account Security](../10-password-policy-and-account-security/README.md) |
+| 11 | [Final Summary](../11-final-summary/README.md) |

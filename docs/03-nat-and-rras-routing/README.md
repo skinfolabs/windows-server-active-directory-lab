@@ -1,15 +1,15 @@
 # NAT and Routing with RRAS
 
-This chapter covers NAT and Routing with RRAS in the Windows Server infrastructure lab. It explains what was configured, why the configuration matters, and which evidence validates the result.
+This chapter documents RRAS routing and NAT for the lab, including SAMNAT interface preparation, domain membership, NAT configuration, and outbound connectivity tests.
 
 
 ## Technical Context
 
-SAMNAT is configured with an internal LAN interface and an external bridged interface. RRAS provides NAT so internal lab systems can reach external networks without assigning each internal host direct external access.
+SAMNAT uses an internal LAN interface and an external bridged interface. RRAS provides NAT so internal systems can reach external networks without direct external addressing.
 
-PAT is documented here as a NAT translation method, not a standalone protocol. It allows multiple internal systems to share one external address by translating sessions with unique port mappings.
+PAT is documented as a NAT translation method. It lets multiple internal systems share one external address through unique port mappings.
 
-The purpose of this section is to make the isolated lab network usable for validation tasks such as DNS forwarding tests, updates, and external connectivity checks while keeping the internal subnet controlled.
+This makes the isolated lab usable for DNS forwarding, updates, and connectivity tests while keeping the internal subnet controlled.
 
 **Implemented controls:**
 
@@ -36,15 +36,15 @@ The purpose of this section is to make the isolated lab network usable for valid
 
 ### Step 01 - Name and join SAMWINPC1 and SAMNAT to the domain
 
-The Windows 10 client is renamed `SAMWINPC1` and joined to `samueldomain.com`. A clear client hostname makes the workstation easy to identify in Active Directory, DNS, DHCP leases, Group Policy results, and administrative logs. Domain membership allows the client to authenticate domain users and receive centrally managed settings.
+The Windows 10 client is renamed `SAMWINPC1` and joined to `samueldomain.com`, making it easy to identify in AD, DNS, DHCP leases, GPO results, and logs.
 
 ![SAMWINPC1 Domain Membership](../../images/04-nat-routing/01-samwinpc1-domain-membership.png)
 
 <p><sub><strong>Screenshot 028 - SAMWINPC1 Domain Membership:</strong> SAMWINPC1 configured with its computer name and joined to the samueldomain.com domain.</sub></p>
 
-The routing server is renamed `SAMNAT` and joined to the same domain. After the domain change, Windows reports the full computer name as `SAMNAT.SamuelDomain.com`. `SAMNAT` is the short hostname, while `SAMNAT.SamuelDomain.com` is the fully qualified domain name that identifies the server inside the domain DNS namespace.
+The routing server is renamed `SAMNAT` and joined to the domain. Windows reports the full computer name as `SAMNAT.SamuelDomain.com`.
 
-> RRAS and NAT can operate on a standalone Windows Server, so domain membership is not a technical requirement for packet routing. In this lab, joining SAMNAT to the domain provides centralized administration, domain authentication, DNS registration, and consistent access to management tools.
+> RRAS and NAT can run on a standalone server. In this lab, domain membership adds centralized administration, domain authentication, DNS registration, and consistent management access.
 
 ![SAMNAT Domain Membership](../../images/04-nat-routing/02-samnat-domain-membership.png)
 
@@ -56,7 +56,7 @@ The routing server is renamed `SAMNAT` and joined to the same domain. After the 
 
 SAMNAT has a LAN interface for the internal `192.168.116.0/24` network and a WAN interface connected to the bridged external network.
 
-> A NAT router needs at least two sides: an inside network and an outside network. The LAN adapter faces the private domain network, while the WAN adapter provides the path toward the external network.
+> A NAT router needs an inside and outside network. The LAN adapter faces the domain, while the WAN adapter provides the external path.
 
 ![SAMNAT NIC Setup](../../images/04-nat-routing/03-samnat-domain-join-and-nic-setup.png)
 
@@ -68,7 +68,7 @@ SAMNAT has a LAN interface for the internal `192.168.116.0/24` network and a WAN
 
 The Remote Access role is installed to provide Routing and Remote Access Service functionality.
 
-> RRAS is the Windows Server feature that can provide routing, NAT, and remote access capabilities. In this lab it is used as a router/NAT service so internal machines do not need direct external network exposure.
+> RRAS provides routing, NAT, and remote-access capabilities. Here it is used for router/NAT service, not direct external exposure of internal machines.
 
 ![Remote Access Role Selection](../../images/04-nat-routing/07-remote-access-role-selection.png)
 
@@ -80,7 +80,7 @@ The Remote Access role is installed to provide Routing and Remote Access Service
 
 RRAS is configured with NAT and LAN routing. This allows internal hosts to send traffic through SAMNAT.
 
-> NAT translates private internal addresses into an address that can communicate externally. PAT, often called NAT overload, also tracks sessions by port number so multiple internal machines can share the same outside path at the same time.
+> NAT translates private internal addresses for external communication. PAT tracks sessions by port so multiple hosts can share the same outside path.
 
 ![NAT and LAN Routing Selection](../../images/04-nat-routing/09-nat-and-lan-routing-selection.png)
 
@@ -92,7 +92,7 @@ RRAS is configured with NAT and LAN routing. This allows internal hosts to send 
 
 The WAN interface is selected as the public interface connected to the external network. NAT is enabled on this interface.
 
-> RRAS must know which adapter is internal and which one is external. Marking the wrong adapter as public can break routing or accidentally expose the wrong side of the network.
+> RRAS must know which adapter is internal and which is external; selecting the wrong public interface can break routing or expose the wrong side.
 
 ![NAT Public Interface Configuration](../../images/04-nat-routing/10-nat-public-interface-configuration.png)
 
@@ -104,7 +104,7 @@ The WAN interface is selected as the public interface connected to the external 
 
 After NAT is configured, DC1 can reach an external DNS address. This proves that internal systems can route outbound traffic through SAMNAT.
 
-> A connectivity test confirms that the design works end to end: DC1 sends traffic to its gateway, SAMNAT translates and routes it, and the response returns correctly. This validation is needed before later DNS forwarding and update-related tests.
+> Connectivity testing proves the full path: DC1 sends traffic to SAMNAT, NAT translates it, and the response returns correctly.
 
 ![DC1 Internet Connectivity Test](../../images/04-nat-routing/11-dc1-internet-connectivity-test.png)
 
@@ -115,7 +115,7 @@ After NAT is configured, DC1 can reach an external DNS address. This proves that
 ## Validation and Summary
 
 
-The routing configuration is validated by RRAS role selection, NAT and LAN routing configuration, public interface selection, and ping tests from DC1, DC2, and the Windows 10 client.
+Validation confirms RRAS role selection, NAT/LAN routing, public interface selection, and ping tests from DC1, DC2, and the Windows 10 client.
 
 
 This chapter provides outbound lab connectivity through SAMNAT. That path supports later external DNS forwarding tests, client connectivity checks, and lab-only remote-access validation.
@@ -124,17 +124,17 @@ This chapter provides outbound lab connectivity through SAMNAT. That path suppor
 
 ## Project Chapters
 
-| # | Chapter | Description |
-|---|---------|-------------|
-| 0 | [Project Overview](../../README.md) | Main project overview, objectives, tools, and skills |
-| 1 | [Topology and Lab Environment](../01-topology-and-lab-environment/README.md) | Lab topology, addressing, server roles, operating-system baseline, and virtualization inventory |
-| 2 | [Active Directory Domain Services](../02-active-directory-domain-services/README.md) | Domain-controller deployment, administrative structures, scripted account creation, FSMO work, and AD replication validation |
-| 3 | [NAT and Routing with RRAS](../03-nat-and-rras-routing/README.md) | SAMNAT routing, RRAS NAT configuration, and outbound connectivity validation |
-| 4 | [DHCP Services and Failover](../04-dhcp-services-and-failover/README.md) | DHCP scope, exclusions, options, client lease validation, and DHCP failover |
-| 5 | [Remote Administration](../05-remote-administration/README.md) | RDP administration, administrator group access, and lab-only NAT forwarding validation |
-| 6 | [DNS Services and Name Resolution](../06-dns-services-and-name-resolution/README.md) | Forwarders, controlled zones, conditional forwarding, stub zones, secondary zones, host records, and round robin |
-| 7 | [Roaming and Mandatory Profiles](../07-roaming-and-mandatory-profiles/README.md) | Roaming profile storage, profile paths, server-side profile folders, and mandatory profile conversion |
-| 8 | [File Services and Access Control](../08-file-services-and-access-control/README.md) | File services, home folders, DATA permissions, mapped drives, and FSRM quota controls |
-| 9 | [Group Policy Hardening and Software Deployment](../09-group-policy-hardening-and-software-deployment/README.md) | User restrictions, removable-storage controls, administrator exceptions, local administrator targeting, and MSI deployment |
-| 10 | [Password Policy and Account Security](../10-password-policy-and-account-security/README.md) | Domain password policy baseline and account-security explanation |
-| 11 | [Final Summary](../11-final-summary/README.md) | Validation summary, production recommendations, skills, and project closure |
+| # | Chapter |
+|---|---------|
+| 0 | [Project Overview](../../README.md) |
+| 1 | [Topology and Lab Environment](../01-topology-and-lab-environment/README.md) |
+| 2 | [Active Directory Domain Services](../02-active-directory-domain-services/README.md) |
+| 3 | [NAT and Routing with RRAS](../03-nat-and-rras-routing/README.md) |
+| 4 | [DHCP Services and Failover](../04-dhcp-services-and-failover/README.md) |
+| 5 | [Remote Administration](../05-remote-administration/README.md) |
+| 6 | [DNS Services and Name Resolution](../06-dns-services-and-name-resolution/README.md) |
+| 7 | [Roaming and Mandatory Profiles](../07-roaming-and-mandatory-profiles/README.md) |
+| 8 | [File Services and Access Control](../08-file-services-and-access-control/README.md) |
+| 9 | [Group Policy Hardening and Software Deployment](../09-group-policy-hardening-and-software-deployment/README.md) |
+| 10 | [Password Policy and Account Security](../10-password-policy-and-account-security/README.md) |
+| 11 | [Final Summary](../11-final-summary/README.md) |

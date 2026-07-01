@@ -1,8 +1,8 @@
 # Final Summary
 
-This lab demonstrates a complete Windows Server domain environment built around identity, network services, remote administration, file services, endpoint policy enforcement, and client validation. The result is a working `samueldomain.com` domain with two domain controllers, centralized DNS and DHCP, RRAS NAT routing, profile management, shared storage, Group Policy hardening, software deployment, and domain password policy controls.
+This lab demonstrates a Windows Server domain environment built around identity, network services, remote administration, file services, endpoint policy enforcement, and client validation. The result is a working `samueldomain.com` domain with two domain controllers, centralized DNS and DHCP, RRAS NAT routing, profile management, shared storage, Group Policy hardening, software deployment, and password policy controls.
 
-The project also separates lab evidence from production design. Screenshots and commands validate that the configuration worked in the isolated training environment, while the recommendations below document where production deployments would require stronger security, monitoring, segmentation, and credential handling.
+Screenshots and commands validate the configuration in an isolated lab. The recommendations below identify where production deployments would need stronger security, monitoring, segmentation, and credential handling.
 
 ## Validation Summary
 
@@ -23,31 +23,30 @@ The project also separates lab evidence from production design. Screenshots and 
 
 ## Production Recommendations
 
-- Keep the visible domain names, usernames, internal addresses, and lab passwords only as isolated training data. Do not reuse them as production credentials.
-- Use named administrator accounts, least privilege, MFA, privileged-access management, and logon auditing for all administrative work.
-- The built-in Administrator account has the well-known RID 500 and is commonly targeted. Disabling or renaming it after creating controlled named administrator accounts reduces predictable exposure.
-- Use VPN, RD Gateway, MFA, source-IP restrictions, firewall rules, and privileged-access monitoring instead of direct RDP port forwarding.
+- Keep visible domain names, usernames, internal addresses, and lab passwords as isolated training data only.
+- Use named administrator accounts with least privilege, MFA, privileged-access management, and logon auditing.
+- Disable or rename the built-in Administrator account after creating controlled named admin accounts. Its RID 500 identity is predictable and commonly targeted.
+- Use VPN, RD Gateway, MFA, source-IP restrictions, firewall rules, and monitoring instead of direct RDP port forwarding.
 - Keep Windows Defender Firewall enabled and allow required services through explicit inbound rules.
 - Use least-privilege Active Directory security groups for file access. Broad `Everyone` permissions are acceptable only for isolated lab demonstrations.
-- Treat DHCP failover as DHCP lease-state and service-continuity protection, not as a general-purpose Windows failover cluster.
+- Treat DHCP failover as lease-state and service-continuity protection, not as a general-purpose Windows failover cluster.
 - Use reliable NTP and consistent time settings before treating logs as investigation-ready evidence.
-- For password policy, combine length and complexity with compromised-password screening, MFA, account lockout protection, monitoring, and help-desk procedures that do not block legitimate password changes.
+- Combine password length and complexity with compromised-password screening, MFA, account lockout protection, monitoring, and clear help-desk procedures.
 - DNS round robin can rotate multiple A-record responses, but it does not perform health checks and should not be treated as full load balancing.
-- Conditional forwarders and stub zones are useful in enterprise DNS designs, but production use should reflect trusted namespaces, partner domains, or separate AD forests rather than public-domain lab examples.
+- Use conditional forwarders and stub zones for trusted namespaces, partner domains, or separate AD forests.
 - GPO computer settings should be linked or filtered so they apply to computer accounts, not only to OUs containing user accounts.
 
 ## Skills Demonstrated
 
 - Windows Server administration
-- Active Directory forest and domain deployment
-- Domain controller promotion and replication validation
+- Active Directory forest, domain, and replication management
 - FSMO role awareness
 - User, group, and OU management
 - PowerShell automation for AD object creation
 - Legacy `dsadd` command usage
 - RRAS NAT/PAT configuration
 - DHCP scope and failover configuration
-- DNS forwarding, zones, host records, stub zones, and round robin
+- DNS forwarding, zones, host records, and round robin
 - Remote administration with RDP
 - Roaming and mandatory profile management
 - NTFS and share permission design
@@ -61,17 +60,17 @@ The project also separates lab evidence from production design. Screenshots and 
 
 ## Project Chapters
 
-| # | Chapter | Description |
-|---|---------|-------------|
-| 0 | [Project Overview](../../README.md) | Main project overview, objectives, tools, and skills |
-| 1 | [Topology and Lab Environment](../01-topology-and-lab-environment/README.md) | Lab topology, addressing, server roles, operating-system baseline, and virtualization inventory |
-| 2 | [Active Directory Domain Services](../02-active-directory-domain-services/README.md) | Domain-controller deployment, administrative structures, scripted account creation, FSMO work, and AD replication validation |
-| 3 | [NAT and Routing with RRAS](../03-nat-and-rras-routing/README.md) | SAMNAT routing, RRAS NAT configuration, and outbound connectivity validation |
-| 4 | [DHCP Services and Failover](../04-dhcp-services-and-failover/README.md) | DHCP scope, exclusions, options, client lease validation, and DHCP failover |
-| 5 | [Remote Administration](../05-remote-administration/README.md) | RDP administration, administrator group access, and lab-only NAT forwarding validation |
-| 6 | [DNS Services and Name Resolution](../06-dns-services-and-name-resolution/README.md) | Forwarders, controlled zones, conditional forwarding, stub zones, secondary zones, host records, and round robin |
-| 7 | [Roaming and Mandatory Profiles](../07-roaming-and-mandatory-profiles/README.md) | Roaming profile storage, profile paths, server-side profile folders, and mandatory profile conversion |
-| 8 | [File Services and Access Control](../08-file-services-and-access-control/README.md) | File services, home folders, DATA permissions, mapped drives, and FSRM quota controls |
-| 9 | [Group Policy Hardening and Software Deployment](../09-group-policy-hardening-and-software-deployment/README.md) | User restrictions, removable-storage controls, administrator exceptions, local administrator targeting, and MSI deployment |
-| 10 | [Password Policy and Account Security](../10-password-policy-and-account-security/README.md) | Domain password policy baseline and account-security explanation |
-| 11 | [Final Summary](README.md) | Validation summary, production recommendations, skills, and project closure |
+| # | Chapter |
+|---|---------|
+| 0 | [Project Overview](../../README.md) |
+| 1 | [Topology and Lab Environment](../01-topology-and-lab-environment/README.md) |
+| 2 | [Active Directory Domain Services](../02-active-directory-domain-services/README.md) |
+| 3 | [NAT and Routing with RRAS](../03-nat-and-rras-routing/README.md) |
+| 4 | [DHCP Services and Failover](../04-dhcp-services-and-failover/README.md) |
+| 5 | [Remote Administration](../05-remote-administration/README.md) |
+| 6 | [DNS Services and Name Resolution](../06-dns-services-and-name-resolution/README.md) |
+| 7 | [Roaming and Mandatory Profiles](../07-roaming-and-mandatory-profiles/README.md) |
+| 8 | [File Services and Access Control](../08-file-services-and-access-control/README.md) |
+| 9 | [Group Policy Hardening and Software Deployment](../09-group-policy-hardening-and-software-deployment/README.md) |
+| 10 | [Password Policy and Account Security](../10-password-policy-and-account-security/README.md) |
+| 11 | [Final Summary](README.md) |

@@ -1,4 +1,4 @@
-﻿# Image Manifest
+# Image Manifest
 
 This manifest lists every evidence image included in the repository. Images are organized in the same technical order as the lab workflow.
 

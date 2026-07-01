@@ -2,11 +2,6 @@
 
 This chapter covers File Services and Access Control in the Windows Server infrastructure lab. It explains what was configured, why the configuration matters, and which evidence validates the result.
 
----
-
-## Purpose
-
-Deploy file services, home folders, DATA share permissions, mapped drives, and FSRM quota controls for domain users and groups.
 
 ## Technical Context
 
@@ -32,19 +27,6 @@ The purpose is to demonstrate how enterprise file access is controlled through l
 | Home folder | A per-user storage location mapped automatically through Active Directory. |
 | Mapped drive | A drive letter that points to a network share. |
 | FSRM quota | File Server Resource Manager control that limits storage consumption. |
-
-## Steps Covered
-
-| Step | Description |
-|------|-------------|
-| Install the File Server role | DC2 is prepared to host file shares for domain users. |
-| Create the home folder root | The home folder root is created and shared so each user can receive a personal mapped folder. |
-| Map home folders through AD | The AD user properties are configured with a home folder path. |
-| Validate mapped home drives | The Windows 10 client shows the mapped home drive, confirming the user folder mapping worked. |
-| Configure DATA share permissions | The DATA share is configured with group based permissions. |
-| Validate restricted Sales permissions | The Sales user test confirms that the user can access the share but cannot delete files. |
-| Create a script-based drive mapping | A shared Script folder is prepared on DC2 to store the batch file used by domain clients. |
-| Configure a 5 GB hard quota | File Server Resource Manager is used to enforce a hard quota on home folders. |
 
 ---
 
@@ -174,11 +156,11 @@ File Server Resource Manager is used to enforce a hard quota on home folders. Th
 
 ---
 
-## Validation
+## Validation and Summary
+
 
 Validation is based on file-server role installation, folder and share creation, NTFS permissions, AD home-folder mapping, mapped drive visibility, user access tests, a batch-based drive mapping, and the hard quota configuration.
 
-## Chapter Summary
 
 This chapter provides the shared storage layer for the lab. It demonstrates the relationship between AD groups, NTFS permissions, share access, home folders, mapped drives, and FSRM quota enforcement.
 
@@ -186,18 +168,17 @@ This chapter provides the shared storage layer for the lab. It demonstrates the 
 
 ## Project Chapters
 
-| Chapter | Description |
-|---------|-------------|
-| [Project Overview](../../README.md) | Main project overview, topology, scope, and outcomes |
-| [Network Topology and Lab Planning](../01-network-topology-and-lab-planning/README.md) | Define the lab topology, domain name, server roles, addressing plan, operating-system baseline, and virtualization inventory before infrastructure services are installed. |
-| [Active Directory Domain Services](../02-active-directory-domain-services/README.md) | Build the identity foundation by promoting DC1, adding DC2, creating administrative structures, automating account creation, and validating directory replication. |
-| [NAT and Routing with RRAS](../03-nat-and-rras-routing/README.md) | Configure SAMNAT as the lab routing server so internal domain systems can reach external networks through a controlled NAT path. |
-| [DHCP Services and Failover](../04-dhcp-services-and-failover/README.md) | Deploy DHCP services so Windows clients can receive consistent IP addressing, gateway, DNS, and lease settings automatically. |
-| [Remote Administration](../05-remote-administration/README.md) | Enable controlled Remote Desktop administration for approved administrators and document a lab-only NAT forwarding test. |
-| [DNS Services and Name Resolution](../06-dns-services-and-name-resolution/README.md) | Configure internal and external DNS behavior, including resolver settings, forwarders, controlled zones, conditional forwarding, stub zones, secondary zones, host records, and round robin records. |
-| [Roaming and Mandatory Profiles](../07-roaming-and-mandatory-profiles/README.md) | Configure roaming profile storage and convert a profile to mandatory mode so user profile behavior can be controlled across domain workstations. |
-| [File Services and Access Control](../08-file-services-and-access-control/README.md) | Deploy file services, home folders, DATA share permissions, mapped drives, and FSRM quota controls for domain users and groups. |
-| [Group Policy Hardening and Software Deployment](../09-group-policy-hardening-and-software-deployment/README.md) | Apply domain-based workstation controls through Group Policy, including user restrictions, removable-storage controls, administrator exceptions, local administrator targeting, and MSI software deployment. |
-| [Password Policy and Account Security](../10-password-policy-and-account-security/README.md) | Configure a domain-linked password baseline and explain how password policy supports account security in the lab. |
-| [Testing, Results, and Recommendations](../11-testing-results-and-recommendations/README.md) | Final validation, production notes, limitations, skills, and recommendations |
-
+| # | Chapter | Description |
+|---|---------|-------------|
+| 0 | [Project Overview](../../README.md) | Main project overview, objectives, tools, and skills |
+| 1 | [Topology and Lab Environment](../01-topology-and-lab-environment/README.md) | Lab topology, addressing, server roles, operating-system baseline, and virtualization inventory |
+| 2 | [Active Directory Domain Services](../02-active-directory-domain-services/README.md) | Domain-controller deployment, administrative structures, scripted account creation, FSMO work, and AD replication validation |
+| 3 | [NAT and Routing with RRAS](../03-nat-and-rras-routing/README.md) | SAMNAT routing, RRAS NAT configuration, and outbound connectivity validation |
+| 4 | [DHCP Services and Failover](../04-dhcp-services-and-failover/README.md) | DHCP scope, exclusions, options, client lease validation, and DHCP failover |
+| 5 | [Remote Administration](../05-remote-administration/README.md) | RDP administration, administrator group access, and lab-only NAT forwarding validation |
+| 6 | [DNS Services and Name Resolution](../06-dns-services-and-name-resolution/README.md) | Forwarders, controlled zones, conditional forwarding, stub zones, secondary zones, host records, and round robin |
+| 7 | [Roaming and Mandatory Profiles](../07-roaming-and-mandatory-profiles/README.md) | Roaming profile storage, profile paths, server-side profile folders, and mandatory profile conversion |
+| 8 | [File Services and Access Control](../08-file-services-and-access-control/README.md) | File services, home folders, DATA permissions, mapped drives, and FSRM quota controls |
+| 9 | [Group Policy Hardening and Software Deployment](../09-group-policy-hardening-and-software-deployment/README.md) | User restrictions, removable-storage controls, administrator exceptions, local administrator targeting, and MSI deployment |
+| 10 | [Password Policy and Account Security](../10-password-policy-and-account-security/README.md) | Domain password policy baseline and account-security explanation |
+| 11 | [Final Summary](../11-final-summary/README.md) | Validation summary, production recommendations, skills, and project closure |

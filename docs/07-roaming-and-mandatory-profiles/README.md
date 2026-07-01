@@ -2,11 +2,6 @@
 
 This chapter covers Roaming and Mandatory Profiles in the Windows Server infrastructure lab. It explains what was configured, why the configuration matters, and which evidence validates the result.
 
----
-
-## Purpose
-
-Configure roaming profile storage and convert a profile to mandatory mode so user profile behavior can be controlled across domain workstations.
 
 ## Technical Context
 
@@ -30,16 +25,6 @@ The goal of this section is to show centralized user-environment management. Roa
 | Profile path | The AD user-account setting that points Windows to the server-side profile location. |
 | `NTUSER.DAT` | The profile registry hive that stores user-specific Windows settings. |
 | `NTUSER.MAN` | The mandatory-profile version of the hive, causing profile changes to be discarded at sign-out. |
-
-## Steps Covered
-
-| Step | Description |
-|------|-------------|
-| Create the profile storage folder | A profile folder is created on DC1 to store roaming profile data centrally. |
-| Configure profile share permissions | The folder is shared so users can access their roaming profile location through the network. |
-| Assign the profile path in AD | The user object receives a profile path that points to the roaming profile share. |
-| Confirm profile folder creation | After the user signs in, the server side profile folder is created automatically. |
-| Convert the profile to mandatory | After the roaming profile has been created and the user is logged off, the administrator opens the server side profile folder and renames NTUSER.DAT to NTUSER.MAN . |
 
 ---
 
@@ -111,11 +96,11 @@ The User Profiles control panel reports the account profile as `Mandatory`, conf
 
 ---
 
-## Validation
+## Validation and Summary
+
 
 Validation is based on profile folder creation, share and NTFS permissions, AD profile path assignment, client-side profile visibility, owner and permission updates, NTUSER.MAN conversion, and the mandatory profile status screen.
 
-## Chapter Summary
 
 This chapter demonstrates domain profile management. Roaming profiles provide portable user settings, while mandatory profiles enforce a controlled profile state that discards user changes at sign-out.
 
@@ -123,18 +108,17 @@ This chapter demonstrates domain profile management. Roaming profiles provide po
 
 ## Project Chapters
 
-| Chapter | Description |
-|---------|-------------|
-| [Project Overview](../../README.md) | Main project overview, topology, scope, and outcomes |
-| [Network Topology and Lab Planning](../01-network-topology-and-lab-planning/README.md) | Define the lab topology, domain name, server roles, addressing plan, operating-system baseline, and virtualization inventory before infrastructure services are installed. |
-| [Active Directory Domain Services](../02-active-directory-domain-services/README.md) | Build the identity foundation by promoting DC1, adding DC2, creating administrative structures, automating account creation, and validating directory replication. |
-| [NAT and Routing with RRAS](../03-nat-and-rras-routing/README.md) | Configure SAMNAT as the lab routing server so internal domain systems can reach external networks through a controlled NAT path. |
-| [DHCP Services and Failover](../04-dhcp-services-and-failover/README.md) | Deploy DHCP services so Windows clients can receive consistent IP addressing, gateway, DNS, and lease settings automatically. |
-| [Remote Administration](../05-remote-administration/README.md) | Enable controlled Remote Desktop administration for approved administrators and document a lab-only NAT forwarding test. |
-| [DNS Services and Name Resolution](../06-dns-services-and-name-resolution/README.md) | Configure internal and external DNS behavior, including resolver settings, forwarders, controlled zones, conditional forwarding, stub zones, secondary zones, host records, and round robin records. |
-| [Roaming and Mandatory Profiles](../07-roaming-and-mandatory-profiles/README.md) | Configure roaming profile storage and convert a profile to mandatory mode so user profile behavior can be controlled across domain workstations. |
-| [File Services and Access Control](../08-file-services-and-access-control/README.md) | Deploy file services, home folders, DATA share permissions, mapped drives, and FSRM quota controls for domain users and groups. |
-| [Group Policy Hardening and Software Deployment](../09-group-policy-hardening-and-software-deployment/README.md) | Apply domain-based workstation controls through Group Policy, including user restrictions, removable-storage controls, administrator exceptions, local administrator targeting, and MSI software deployment. |
-| [Password Policy and Account Security](../10-password-policy-and-account-security/README.md) | Configure a domain-linked password baseline and explain how password policy supports account security in the lab. |
-| [Testing, Results, and Recommendations](../11-testing-results-and-recommendations/README.md) | Final validation, production notes, limitations, skills, and recommendations |
-
+| # | Chapter | Description |
+|---|---------|-------------|
+| 0 | [Project Overview](../../README.md) | Main project overview, objectives, tools, and skills |
+| 1 | [Topology and Lab Environment](../01-topology-and-lab-environment/README.md) | Lab topology, addressing, server roles, operating-system baseline, and virtualization inventory |
+| 2 | [Active Directory Domain Services](../02-active-directory-domain-services/README.md) | Domain-controller deployment, administrative structures, scripted account creation, FSMO work, and AD replication validation |
+| 3 | [NAT and Routing with RRAS](../03-nat-and-rras-routing/README.md) | SAMNAT routing, RRAS NAT configuration, and outbound connectivity validation |
+| 4 | [DHCP Services and Failover](../04-dhcp-services-and-failover/README.md) | DHCP scope, exclusions, options, client lease validation, and DHCP failover |
+| 5 | [Remote Administration](../05-remote-administration/README.md) | RDP administration, administrator group access, and lab-only NAT forwarding validation |
+| 6 | [DNS Services and Name Resolution](../06-dns-services-and-name-resolution/README.md) | Forwarders, controlled zones, conditional forwarding, stub zones, secondary zones, host records, and round robin |
+| 7 | [Roaming and Mandatory Profiles](../07-roaming-and-mandatory-profiles/README.md) | Roaming profile storage, profile paths, server-side profile folders, and mandatory profile conversion |
+| 8 | [File Services and Access Control](../08-file-services-and-access-control/README.md) | File services, home folders, DATA permissions, mapped drives, and FSRM quota controls |
+| 9 | [Group Policy Hardening and Software Deployment](../09-group-policy-hardening-and-software-deployment/README.md) | User restrictions, removable-storage controls, administrator exceptions, local administrator targeting, and MSI deployment |
+| 10 | [Password Policy and Account Security](../10-password-policy-and-account-security/README.md) | Domain password policy baseline and account-security explanation |
+| 11 | [Final Summary](../11-final-summary/README.md) | Validation summary, production recommendations, skills, and project closure |

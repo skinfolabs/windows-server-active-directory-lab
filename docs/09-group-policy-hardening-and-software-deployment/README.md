@@ -2,11 +2,6 @@
 
 This chapter covers Group Policy Hardening and Software Deployment in the Windows Server infrastructure lab. It explains what was configured, why the configuration matters, and which evidence validates the result.
 
----
-
-## Purpose
-
-Apply domain-based workstation controls through Group Policy, including user restrictions, removable-storage controls, administrator exceptions, local administrator targeting, and MSI software deployment.
 
 ## Technical Context
 
@@ -33,21 +28,6 @@ The hardening focus is to reduce the standard user's ability to change workstati
 | Restricted Groups | A policy setting that controls membership of local groups such as Administrators. |
 | Computer Configuration | GPO settings that apply to computer accounts, usually at startup or background refresh. |
 | MSI deployment | Software installation through Group Policy using a network-accessible Windows Installer package. |
-
-## Steps Covered
-
-| Step | Description |
-|------|-------------|
-| Open Group Policy Management | The Group Policy Management console provides centralized control for domain linked policies. |
-| Create a client-hardening GPO | A new GPO is created for client restrictions such as Command Prompt, Control Panel, and removable storage controls. |
-| Restrict Command Prompt access | Inside User Configuration Policies Administrative Templates System , the Prevent access to the command prompt setting is enabled in the BLOCK CMD & CP GPO. |
-| Restrict access to Control Panel and PC settings | Inside User Configuration Policies Administrative Templates Control Panel , the Prohibit access to Control Panel and PC settings policy is enabled. |
-| Validate standard-user restriction | The standard user is blocked from accessing Control Panel, confirming that the hardening policy applies. |
-| Configure removable storage restrictions | The BLOCK Disk On Key GPO is linked at the domain level so the removable storage restriction can be processed by the targeted domain users and computers. |
-| Add Sys_Admins to local Administrators | The Add to Local Admins GPO is linked under Sys Admins in Group Policy Management. |
-| Apply Sys_Admins workstation rules | The Allow CMD & CP GPO is linked beneath Sys Admins . |
-| Deploy software through GPO | The Notepad++ 8.5 MSI package is assigned under Computer Configuration Policies Software Settings Software installation . |
-| Validate software deployment | The Windows 10 client SAMWINPC1 shows Notepad++ installed after the computer received the software deployment policy. |
 
 ---
 
@@ -199,11 +179,11 @@ The Windows 10 client `SAMWINPC1` shows Notepad++ installed after the computer r
 
 ---
 
-## Validation
+## Validation and Summary
+
 
 Validation is based on Group Policy Management screens, policy editor settings, standard-user restriction evidence, Sys_Admins exception settings, Restricted Groups configuration, software assignment, and Notepad++ visibility on the Windows 10 client.
 
-## Chapter Summary
 
 This chapter centralizes endpoint policy enforcement through GPO. It shows standard-user restrictions, administrator exceptions, removable-media controls, local-admin targeting considerations, and GPO-based software deployment.
 
@@ -211,17 +191,17 @@ This chapter centralizes endpoint policy enforcement through GPO. It shows stand
 
 ## Project Chapters
 
-| Chapter | Description |
-|---------|-------------|
-| [Project Overview](../../README.md) | Main project overview, topology, scope, and outcomes |
-| [Network Topology and Lab Planning](../01-network-topology-and-lab-planning/README.md) | Define the lab topology, domain name, server roles, addressing plan, operating-system baseline, and virtualization inventory before infrastructure services are installed. |
-| [Active Directory Domain Services](../02-active-directory-domain-services/README.md) | Build the identity foundation by promoting DC1, adding DC2, creating administrative structures, automating account creation, and validating directory replication. |
-| [NAT and Routing with RRAS](../03-nat-and-rras-routing/README.md) | Configure SAMNAT as the lab routing server so internal domain systems can reach external networks through a controlled NAT path. |
-| [DHCP Services and Failover](../04-dhcp-services-and-failover/README.md) | Deploy DHCP services so Windows clients can receive consistent IP addressing, gateway, DNS, and lease settings automatically. |
-| [Remote Administration](../05-remote-administration/README.md) | Enable controlled Remote Desktop administration for approved administrators and document a lab-only NAT forwarding test. |
-| [DNS Services and Name Resolution](../06-dns-services-and-name-resolution/README.md) | Configure internal and external DNS behavior, including resolver settings, forwarders, controlled zones, conditional forwarding, stub zones, secondary zones, host records, and round robin records. |
-| [Roaming and Mandatory Profiles](../07-roaming-and-mandatory-profiles/README.md) | Configure roaming profile storage and convert a profile to mandatory mode so user profile behavior can be controlled across domain workstations. |
-| [File Services and Access Control](../08-file-services-and-access-control/README.md) | Deploy file services, home folders, DATA share permissions, mapped drives, and FSRM quota controls for domain users and groups. |
-| [Group Policy Hardening and Software Deployment](../09-group-policy-hardening-and-software-deployment/README.md) | Apply domain-based workstation controls through Group Policy, including user restrictions, removable-storage controls, administrator exceptions, local administrator targeting, and MSI software deployment. |
-| [Password Policy and Account Security](../10-password-policy-and-account-security/README.md) | Configure a domain-linked password baseline and explain how password policy supports account security in the lab. |
-| [Testing, Results, and Recommendations](../11-testing-results-and-recommendations/README.md) | Final validation, production notes, limitations, skills, and recommendations |
+| # | Chapter | Description |
+|---|---------|-------------|
+| 0 | [Project Overview](../../README.md) | Main project overview, objectives, tools, and skills |
+| 1 | [Topology and Lab Environment](../01-topology-and-lab-environment/README.md) | Lab topology, addressing, server roles, operating-system baseline, and virtualization inventory |
+| 2 | [Active Directory Domain Services](../02-active-directory-domain-services/README.md) | Domain-controller deployment, administrative structures, scripted account creation, FSMO work, and AD replication validation |
+| 3 | [NAT and Routing with RRAS](../03-nat-and-rras-routing/README.md) | SAMNAT routing, RRAS NAT configuration, and outbound connectivity validation |
+| 4 | [DHCP Services and Failover](../04-dhcp-services-and-failover/README.md) | DHCP scope, exclusions, options, client lease validation, and DHCP failover |
+| 5 | [Remote Administration](../05-remote-administration/README.md) | RDP administration, administrator group access, and lab-only NAT forwarding validation |
+| 6 | [DNS Services and Name Resolution](../06-dns-services-and-name-resolution/README.md) | Forwarders, controlled zones, conditional forwarding, stub zones, secondary zones, host records, and round robin |
+| 7 | [Roaming and Mandatory Profiles](../07-roaming-and-mandatory-profiles/README.md) | Roaming profile storage, profile paths, server-side profile folders, and mandatory profile conversion |
+| 8 | [File Services and Access Control](../08-file-services-and-access-control/README.md) | File services, home folders, DATA permissions, mapped drives, and FSRM quota controls |
+| 9 | [Group Policy Hardening and Software Deployment](../09-group-policy-hardening-and-software-deployment/README.md) | User restrictions, removable-storage controls, administrator exceptions, local administrator targeting, and MSI deployment |
+| 10 | [Password Policy and Account Security](../10-password-policy-and-account-security/README.md) | Domain password policy baseline and account-security explanation |
+| 11 | [Final Summary](../11-final-summary/README.md) | Validation summary, production recommendations, skills, and project closure |
